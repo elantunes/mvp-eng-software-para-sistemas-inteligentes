@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from flask_openapi3 import OpenAPI, Info
+from pickle import dump
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
@@ -34,7 +35,8 @@ url = "https://raw.githubusercontent.com/elantunes/mvp-eng-software-para-sistema
 
 # Lê o arquivo
 #dataset = pd.read_csv(url, delimiter=',', usecols=usecols)
-dataset = pd.read_csv(url, nrows=10000, delimiter=',')
+dataset = pd.read_csv(url, nrows=40, delimiter=',')
+#dataset = pd.read_csv(url, nrows=55692, delimiter=',')
 
 # Mostra as primeiras linhas do dataset
 dataset.head()
@@ -48,8 +50,10 @@ seed = 7 # semente aleatória
 
 # Separação em conjuntos de treino e teste
 array = dataset.values
-X = array[:,0:len(dataset.columns)-1]
-y = array[:,len(dataset.columns)-1]
+numero_colunas_dataset = len(dataset.columns)-1
+
+X = array[:,0:numero_colunas_dataset]
+y = array[:,numero_colunas_dataset]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y,
     test_size=test_size, shuffle=True, random_state=seed, stratify=y) # holdout com estratificação
@@ -68,9 +72,9 @@ models = []
 
 # Criando os modelos e adicionando-os na lista de modelos
 models.append(('KNN', KNeighborsClassifier()))
-models.append(('CART', DecisionTreeClassifier()))
-models.append(('NB', GaussianNB()))
-models.append(('SVM', SVC()))
+#models.append(('CART', DecisionTreeClassifier()))
+#models.append(('NB', GaussianNB()))
+#models.append(('SVM', SVC()))
 
 # Listas para armazenar os resultados
 results = []
@@ -82,6 +86,11 @@ for name, model in models:
     results.append(cv_results)
     names.append(name)
     msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
+
+    # Salva o modelo no disco
+    filename = f"modelos_ml/fumantes_{name.lower()}.pkl"
+    dump(model, open(filename, 'wb'))
+
     print(msg)
 
 # Boxplot de comparação dos modelos
@@ -90,7 +99,7 @@ fig.suptitle('Comparação dos Modelos')
 ax = fig.add_subplot(111)
 plt.boxplot(results)
 ax.set_xticklabels(names)
-plt.show()
+#plt.show()
 
 # Criação e avaliação de modelos: dados padronizados e normalizados
 
@@ -106,9 +115,9 @@ names = []
 
 # Algoritmos que serão utilizados
 knn = ('KNN', KNeighborsClassifier())
-cart = ('CART', DecisionTreeClassifier())
-naive_bayes = ('NB', GaussianNB())
-svm = ('SVM', SVC())
+#cart = ('CART', DecisionTreeClassifier())
+#naive_bayes = ('NB', GaussianNB())
+#svm = ('SVM', SVC())
 
 # Transformações que serão utilizadas
 standard_scaler = ('StandardScaler', StandardScaler())
@@ -119,21 +128,21 @@ min_max_scaler = ('MinMaxScaler', MinMaxScaler())
 
 # Dataset original
 pipelines.append(('KNN-orig', Pipeline([knn])))
-pipelines.append(('CART-orig', Pipeline([cart])))
-pipelines.append(('NB-orig', Pipeline([naive_bayes])))
-pipelines.append(('SVM-orig', Pipeline([svm])))
+#pipelines.append(('CART-orig', Pipeline([cart])))
+#pipelines.append(('NB-orig', Pipeline([naive_bayes])))
+#pipelines.append(('SVM-orig', Pipeline([svm])))
 
 # Dataset Padronizado
 pipelines.append(('KNN-padr', Pipeline([standard_scaler, knn])))
-pipelines.append(('CART-padr', Pipeline([standard_scaler, cart])))
-pipelines.append(('NB-padr', Pipeline([standard_scaler, naive_bayes])))
-pipelines.append(('SVM-padr', Pipeline([standard_scaler, svm])))
+#pipelines.append(('CART-padr', Pipeline([standard_scaler, cart])))
+#pipelines.append(('NB-padr', Pipeline([standard_scaler, naive_bayes])))
+#pipelines.append(('SVM-padr', Pipeline([standard_scaler, svm])))
 
 # Dataset Normalizado
 pipelines.append(('KNN-norm', Pipeline([min_max_scaler, knn])))
-pipelines.append(('CART-norm', Pipeline([min_max_scaler, cart])))
-pipelines.append(('NB-norm', Pipeline([min_max_scaler, naive_bayes])))
-pipelines.append(('SVM-norm', Pipeline([min_max_scaler, svm])))
+#pipelines.append(('CART-norm', Pipeline([min_max_scaler, cart])))
+#pipelines.append(('NB-norm', Pipeline([min_max_scaler, naive_bayes])))
+#pipelines.append(('SVM-norm', Pipeline([min_max_scaler, svm])))
 
 # Executando os pipelines
 for name, model in pipelines:
@@ -149,7 +158,7 @@ fig.suptitle('Comparação dos Modelos - Dataset orginal, padronizado e normaliz
 ax = fig.add_subplot(111)
 plt.boxplot(results)
 ax.set_xticklabels(names, rotation=90)
-plt.show()
+#plt.show()
 
 # Otimização dos hiperparâmetros
 
@@ -185,18 +194,98 @@ for name, model in pipelines:
 
 # Avaliação do modelo com o conjunto de testes
 
-# Preparação do modelo
+# Preparação do modelo de treino
 scaler = StandardScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
 rescaledX = scaler.transform(X_train) # aplicação da padronização no conjunto de treino
-model = KNeighborsClassifier(metric='manhattan', n_neighbors=17)
+model = KNeighborsClassifier(metric='manhattan', n_neighbors=21)
 model.fit(rescaledX, y_train)
 
 # Estimativa da acurácia no conjunto de teste
 rescaledTestX = scaler.transform(X_test) # aplicação da padronização no conjunto de teste
 predictions = model.predict(rescaledTestX)
+print('Estimativa da acurácia no conjunto de teste')
 print(accuracy_score(y_test, predictions))
 
-# Preparação do modelo com TODO o dataset
+# Preparação do modelo com TODO o dataset'
 scaler = StandardScaler().fit(X) # ajuste do scaler com TODO o dataset
 rescaledX = scaler.transform(X) # aplicação da padronização com TODO o dataset
 model.fit(rescaledX, y)
+
+# Estimativa da acurácia no conjunto de TODO dataset
+rescaledTestX = scaler.transform(X_test) # aplicação da padronização no conjunto de teste
+predictions = model.predict(rescaledTestX)
+print('Estimativa da acurácia no conjunto de TODO dataset')
+print(accuracy_score(y_test, predictions))
+
+
+#Simulando a aplicação do modelo em dados não vistos
+
+# Novos dados - não sabemos a classe!
+# data = {'idade': [55],
+#         'altura(cm)': [155],
+#         'peso(kg)': [60],
+#         'cintura(cm)': [81.3],
+#         'visão(esquerda)': [1.2],
+#         'visão(direita)': [1],
+#         'audição(esquerda)': [1],
+#         'audição(direita)': [1],
+#         'sistólica': [114],
+#         'relaxado': [73],
+#         'açucar no sangue em jejum': [94],
+#         'colesterol': [215],
+#         'triglicerídos': [82],
+#         'HDL': [73],
+#         'LDL': [126],
+#         'hemoglobina': [12.9],
+#         'proteína na urina': [1],
+#         'creatinina sérica': [0.7],
+#         'AST': [18],
+#         'ALT': [19],
+#         'Gtp': [27],
+#         'cáries dentárias': [0],
+#         'tártaro,fumante': [1],
+#         }
+
+data = {'idade': [69],
+        'altura(cm)': [170],
+        'peso(kg)': [60],
+        'cintura(cm)': [80],
+        'visão(esquerda)': [0.8],
+        'visão(direita)': [0.8],
+        'audição(esquerda)': [1],
+        'audição(direita)': [1],
+        'sistólica': [138],
+        'relaxado': [86],
+        'açucar no sangue em jejum': [89],
+        'colesterol': [242],
+        'triglicerídos': [182],
+        'HDL': [55],
+        'LDL': [151],
+        'hemoglobina': [15.8],
+        'proteína na urina': [1],
+        'creatinina sérica': [1],
+        'AST': [21],
+        'ALT': [16],
+        'Gtp': [22],
+        'cáries dentárias': [0],
+        'tártaro,fumante': [1],
+        }
+
+atributos = ['idade','altura(cm)','peso(kg)','cintura(cm)','visão(esquerda)','visão(direita)',
+             'audição(esquerda)','audição(direita)','sistólica','relaxado','açucar no sangue em jejum',
+             'colesterol','triglicerídos','HDL','LDL','hemoglobina','proteína na urina',
+             'creatinina sérica','AST','ALT','Gtp','cáries dentárias','tártaro,fumante']
+
+entrada = pd.DataFrame(data, columns=atributos)
+
+array_entrada = entrada.values
+X_entrada = array_entrada[:,0:numero_colunas_dataset].astype(float)
+
+# Padronização nos dados de entrada usando o scaler utilizado em X
+rescaledEntradaX = scaler.transform(X_entrada)
+print(rescaledEntradaX)
+
+# Predição de classes dos dados de entrada
+saidas = model.predict(rescaledEntradaX)
+print(saidas)
+
