@@ -107,10 +107,10 @@ names = []
 # Criando os elementos do pipeline
 
 # Algoritmos que serão utilizados
-knn = ('KNN', KNeighborsClassifier())
-cart = ('CART', DecisionTreeClassifier(criterion='entropy'))
-naive_bayes = ('NB', GaussianNB())
-svm = ('SVM', SVC())
+#knn = ('KNN', KNeighborsClassifier())
+#cart = ('CART', DecisionTreeClassifier(criterion='entropy'))
+#naive_bayes = ('NB', GaussianNB())
+#svm = ('SVM', SVC())
 
 # Transformações que serão utilizadas
 standard_scaler = ('StandardScaler', StandardScaler())
@@ -120,22 +120,22 @@ min_max_scaler = ('MinMaxScaler', MinMaxScaler())
 # Montando os pipelines
 
 # Dataset original
-pipelines.append(('KNN', Pipeline([knn])))
-pipelines.append(('CART', Pipeline([cart])))
-pipelines.append(('NB', Pipeline([naive_bayes])))
-pipelines.append(('SVM', Pipeline([svm])))
+#pipelines.append(('KNN', Pipeline([knn])))
+#pipelines.append(('CART', Pipeline([cart])))
+#pipelines.append(('NB', Pipeline([naive_bayes])))
+#pipelines.append(('SVM', Pipeline([svm])))
 
 # Dataset Padronizado
-pipelines.append(('KNN-padr', Pipeline([standard_scaler, knn])))
-pipelines.append(('CART-padr', Pipeline([standard_scaler, cart])))
-pipelines.append(('NB-padr', Pipeline([standard_scaler, naive_bayes])))
-pipelines.append(('SVM-padr', Pipeline([standard_scaler, svm])))
+#pipelines.append(('KNN-padr', Pipeline([standard_scaler, knn])))
+#pipelines.append(('CART-padr', Pipeline([standard_scaler, cart])))
+#pipelines.append(('NB-padr', Pipeline([standard_scaler, naive_bayes])))
+#pipelines.append(('SVM-padr', Pipeline([standard_scaler, svm])))
 
 # Dataset Normalizado
-pipelines.append(('KNN-norm', Pipeline([min_max_scaler, knn])))
-pipelines.append(('CART-norm', Pipeline([min_max_scaler, cart])))
-pipelines.append(('NB-norm', Pipeline([min_max_scaler, naive_bayes])))
-pipelines.append(('SVM-norm', Pipeline([min_max_scaler, svm])))
+#pipelines.append(('KNN-norm', Pipeline([min_max_scaler, knn])))
+#pipelines.append(('CART-norm', Pipeline([min_max_scaler, cart])))
+#pipelines.append(('NB-norm', Pipeline([min_max_scaler, naive_bayes])))
+#pipelines.append(('SVM-norm', Pipeline([min_max_scaler, svm])))
 
 # Executando os pipelines
 for name, model in pipelines:
@@ -173,9 +173,9 @@ pipelines.append(('cart-norm', Pipeline(steps=[min_max_scaler, cart])))
 param_grid = { 'CART__criterion' : ['entropy'] }
 
 # Prepara e executa o GridSearchCV
-for name, model in pipelines:
-    grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=scoring, cv=kfold)
-    grid.fit(X_train, y_train)
+# for name, model in pipelines:
+#     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=scoring, cv=kfold)
+#     grid.fit(X_train, y_train)
     # imprime a melhor configuração
     #print("Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_))
 
@@ -195,16 +195,16 @@ for name, model in pipelines:
 # Preparação do modelo de treino
 scaler = MinMaxScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
 rescaledX = scaler.transform(X_train) # aplicação da normalização no conjunto de treino
-model = DecisionTreeClassifier(criterion='entropy')
-model.fit(rescaledX, y_train)
+modelCart = DecisionTreeClassifier(criterion='entropy')
+modelCart.fit(rescaledX, y_train)
 
 # Estimativa da acurácia no conjunto de teste
-rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
-predictions = model.predict(rescaledTestX)
-print('Estimativa da acurácia no conjunto de teste (CART)')
-print(accuracy_score(y_test, predictions))
-print('Estimativa da precisão no conjunto de teste (CART)')
-print(precision_score(y_test, predictions))
+# rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
+# predictions = modelCart.predict(rescaledTestX)
+# print('Estimativa da acurácia no conjunto de teste (CART)')
+# print(accuracy_score(y_test, predictions))
+# print('Estimativa da precisão no conjunto de teste (CART)')
+# print(precision_score(y_test, predictions))
 
 # Preparação do modelo com TODO o dataset'
 # scaler = StandardScaler().fit(X) # ajuste do scaler com TODO o dataset
@@ -219,17 +219,17 @@ print(precision_score(y_test, predictions))
 # model.fit(rescaledX, y)
 
 # Estimativa da acurácia no conjunto de TODO dataset
-rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
-predictions = model.predict(rescaledX)
-print(accuracy_score(y, predictions))
-print('Estimativa da precisão no conjunto do dataset (CART)')
-print(precision_score(y, predictions))
-print('\n')
+# rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
+# predictions = modelCart.predict(rescaledX)
+# print(accuracy_score(y, predictions))
+# print('Estimativa da precisão no conjunto do dataset (CART)')
+# print(precision_score(y, predictions))
+# print('\n')
 
 # Salva o modelo no disco
-filename = f"modelos_ml/fumantes_knn-reduzido.pkl"
+filename = f"modelos_ml/fumantes.pkl"
 #filename = f"modelos_ml/fumantes_{knn_.lower()}.pkl"
-dump(model, open(filename, 'wb'))
+dump(modelCart, open(filename, 'wb'))
 
 
 # SVM ############################################################################################
@@ -237,24 +237,24 @@ dump(model, open(filename, 'wb'))
 # Preparação do modelo de treino
 scaler = StandardScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
 rescaledX = scaler.transform(X_train) # aplicação da normalização no conjunto de treino
-model = SVC()
-model.fit(rescaledX, y_train)
+modelSVM = SVC()
+modelSVM.fit(rescaledX, y_train)
 
 # Estimativa da acurácia no conjunto de teste
-rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
-predictions = model.predict(rescaledTestX)
-print('Estimativa da acurácia no conjunto de teste (SVM)')
-print(accuracy_score(y_test, predictions))
-print('Estimativa da precisão no conjunto de teste (SVM)')
-print(precision_score(y_test, predictions))
+# rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
+# predictions = modelSVM.predict(rescaledTestX)
+# print('Estimativa da acurácia no conjunto de teste (SVM)')
+# print(accuracy_score(y_test, predictions))
+# print('Estimativa da precisão no conjunto de teste (SVM)')
+# print(precision_score(y_test, predictions))
 
 # Estimativa da acurácia no conjunto de TODO dataset
-rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
-predictions = model.predict(rescaledX)
-print('Estimativa da acurácia no conjunto do dataset (SVM)')
-print(accuracy_score(y, predictions))
-print('Estimativa da precisão no conjunto do dataset (SVM)')
-print(precision_score(y, predictions))
+# rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
+# predictions = modelSVM.predict(rescaledX)
+# print('Estimativa da acurácia no conjunto do dataset (SVM)')
+# print(accuracy_score(y, predictions))
+# print('Estimativa da precisão no conjunto do dataset (SVM)')
+# print(precision_score(y, predictions))
 
 ##################################################################################################
 
@@ -286,55 +286,55 @@ print(precision_score(y, predictions))
 #         'tártaro,fumante': [1],
 #         }
 
-# data = {'idade': [69],
-#         'altura(cm)': [170],
-#         'peso(kg)': [60],
-#         'cintura(cm)': [80],
-#         'visão(esquerda)': [0.8],
-#         'visão(direita)': [0.8],
-#         'audição(esquerda)': [1],
-#         'audição(direita)': [1],
-#         'sistólica': [138],
-#         'relaxado': [86],
-#         'açucar no sangue em jejum': [89],
-#         'colesterol': [242],
-#         'triglicerídos': [182],
-#         'HDL': [55],
-#         'LDL': [151],
-#         'hemoglobina': [15.8],
-#         'proteína na urina': [1],
-#         'creatinina sérica': [1],
-#         'AST': [21],
-#         'ALT': [16],
-#         'Gtp': [22],
-#         'cáries dentárias': [0],
-#         'tártaro': [0]
-#         }
-
-data = {'idade': [27],
-        'altura(cm)': [160],
+data = {'idade': [69],
+        'altura(cm)': [170],
         'peso(kg)': [60],
-        'cintura(cm)': [81],
+        'cintura(cm)': [80],
         'visão(esquerda)': [0.8],
-        'visão(direita)': [0.6],
+        'visão(direita)': [0.8],
         'audição(esquerda)': [1],
         'audição(direita)': [1],
-        'sistólica': [119],
-        'relaxado': [70],
-        'açucar no sangue em jejum': [130],
-        'colesterol': [192],
-        'triglicerídos': [115],
-        'HDL': [42],
-        'LDL': [127],
-        'hemoglobina': [12.7],
+        'sistólica': [138],
+        'relaxado': [86],
+        'açucar no sangue em jejum': [89],
+        'colesterol': [242],
+        'triglicerídos': [182],
+        'HDL': [55],
+        'LDL': [151],
+        'hemoglobina': [15.8],
         'proteína na urina': [1],
-        'creatinina sérica': [0.6],
-        'AST': [22],
-        'ALT': [19],
-        'Gtp': [18],
+        'creatinina sérica': [1],
+        'AST': [21],
+        'ALT': [16],
+        'Gtp': [22],
         'cáries dentárias': [0],
-        'tártaro': [1]
+        'tártaro': [0]
         }
+
+# data = {'idade': [27],
+#         'altura(cm)': [160],
+#         'peso(kg)': [60],
+#         'cintura(cm)': [81],
+#         'visão(esquerda)': [0.8],
+#         'visão(direita)': [0.6],
+#         'audição(esquerda)': [1],
+#         'audição(direita)': [1],
+#         'sistólica': [119],
+#         'relaxado': [70],
+#         'açucar no sangue em jejum': [130],
+#         'colesterol': [192],
+#         'triglicerídos': [115],
+#         'HDL': [42],
+#         'LDL': [127],
+#         'hemoglobina': [12.7],
+#         'proteína na urina': [1],
+#         'creatinina sérica': [0.6],
+#         'AST': [22],
+#         'ALT': [19],
+#         'Gtp': [18],
+#         'cáries dentárias': [0],
+#         'tártaro': [1]
+#         }
 
 atributos = ['idade','altura(cm)','peso(kg)','cintura(cm)','visão(esquerda)','visão(direita)',
              'audição(esquerda)','audição(direita)','sistólica','relaxado','açucar no sangue em jejum',
@@ -350,6 +350,8 @@ X_entrada = array_entrada[:,0:numero_colunas_dataset].astype(float)
 #rescaledEntradaX = scaler.transform(X_entrada)
 #print(rescaledEntradaX)
 
+model = modelSVM
+
 # Predição de classes dos dados de entrada
 saidas = model.predict(X_entrada)
 #saidas = model.predict(rescaledEntradaX)
@@ -358,38 +360,30 @@ print(saidas)
 
 #################################
 
-ml_path = 'modelos_ml/fumantes_knn-reduzido.pkl'
+ml_path = 'modelos_ml/fumantes.pkl'
 
-modelo = pickle.load(open(ml_path, 'rb'))
+X_input = np.array([27,160,60,81,.8,.6,1,1,119,70,130,192,115,42,127,12.7,1,.6,22,19,18,0,1])
+diagnosis = model.predict(X_input.reshape(1, -1))
+print('Saida 1 (27 - Esperado:0)')
+print(int(diagnosis[0]))
 
-X_input = np.array([69,
-                    170,
-                    60,
-                    80,
-                    0.8,
-                    0.8,
-                    1,
-                    1,
-                    138,
-                    86,
-                    89,
-                    242,
-                    182,
-                    55,
-                    151,
-                    15.8,
-                    1,
-                    1,
-                    21,
-                    16,
-                    22,
-                    0,
-                    0
-                ])
-
-
+X_input = np.array([69,170,60,80,0.8,0.8,1,1,138,86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
 # Faremos o reshape para que o modelo entenda que estamos passando
-diagnosis = modelo.predict(X_input.reshape(1, -1))
+diagnosis = model.predict(X_input.reshape(1, -1))
+print('Saida 2 (69 - Esperado:1)')
+print(int(diagnosis[0]))
 
-print('Saida 2')
+X_input = np.array([82,150,65,81.5,1.2,1.2,1,1,134,86,86,238,117,63,152,12,1,0.9,19,11,16,0,0])
+diagnosis = model.predict(X_input.reshape(1, -1))
+print('Saida 3 (82 - Esperado:0)')
+print(int(diagnosis[0]))
+
+X_input = np.array([31,160,60,86.0,0.7,0.6,1.0,1.0,133.0,80.0,139.0,223.0,151.0,44.0,149.0,16.3,1.0,1.1,26.0,34.0,38.0,0,1])
+diagnosis = model.predict(X_input.reshape(1, -1))
+print('Saida 4 (31 - Esperado:1)')
+print(int(diagnosis[0]))
+
+X_input = np.array([71,165,65,84.0,1.0,1.0,1.0,1.0,120.0,76.0,95.0,235.0,132.0,52.0,166.0,13.7,4.0,0.9,29.0,24.0,13.0,0,0])
+diagnosis = model.predict(X_input.reshape(1, -1))
+print('Saida 5 (71 - Esperado:0)')
 print(int(diagnosis[0]))
