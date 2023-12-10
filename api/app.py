@@ -5,7 +5,7 @@ import pickle
 
 from flask_openapi3 import OpenAPI, Info
 from pickle import dump
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedKFold
@@ -36,8 +36,8 @@ url = "https://raw.githubusercontent.com/elantunes/mvp-eng-software-para-sistema
 
 # Lê o arquivo
 #dataset = pd.read_csv(url, delimiter=',', usecols=usecols)
-#dataset = pd.read_csv(url, nrows=40000, delimiter=',')
 dataset = pd.read_csv(url, nrows=55692, delimiter=',')
+#dataset = pd.read_csv(url, delimiter=',')
 
 # Mostra as primeiras linhas do dataset
 dataset.head()
@@ -46,7 +46,7 @@ print("Dataset obtido!")
 
 # Separação em conjunto de treino e conjunto de teste com holdout
 
-test_size = .2 # tamanho do conjunto de teste
+test_size = .25 # tamanho do conjunto de teste
 seed = 7 # semente aleatória
 
 # Separação em conjuntos de treino e teste
@@ -91,11 +91,11 @@ for name, model in models:
     print(msg)
 
 # Boxplot de comparação dos modelos
-fig = plt.figure(figsize=(15,10))
-fig.suptitle('Comparação dos Modelos')
-ax = fig.add_subplot(111)
-plt.boxplot(results)
-ax.set_xticklabels(names)
+# fig = plt.figure(figsize=(15,10))
+# fig.suptitle('Comparação dos Modelos')
+# ax = fig.add_subplot(111)
+# plt.boxplot(results)
+# ax.set_xticklabels(names)
 #plt.show()
 
 # Criação e avaliação de modelos: dados padronizados e normalizados
@@ -150,11 +150,11 @@ for name, model in pipelines:
     print(msg)
 
 # Boxplot de comparação dos modelos
-fig = plt.figure(figsize=(25,6))
-fig.suptitle('Comparação dos Modelos - Dataset orginal, padronizado e normalizado')
-ax = fig.add_subplot(111)
-plt.boxplot(results)
-ax.set_xticklabels(names, rotation=90)
+# fig = plt.figure(figsize=(25,6))
+# fig.suptitle('Comparação dos Modelos - Dataset orginal, padronizado e normalizado')
+# ax = fig.add_subplot(111)
+# plt.boxplot(results)
+# ax.set_xticklabels(names, rotation=90)
 #plt.show()
 
 # Otimização dos hiperparâmetros
@@ -212,6 +212,9 @@ rescaledTestX = scaler.transform(X_test) # aplicação da padronização no conj
 predictions = model.predict(rescaledTestX)
 print('Estimativa da acurácia no conjunto de teste')
 print(accuracy_score(y_test, predictions))
+print('Estimativa da precisão no conjunto de teste')
+print(precision_score(y_test, predictions))
+
 
 # Preparação do modelo com TODO o dataset'
 # scaler = StandardScaler().fit(X) # ajuste do scaler com TODO o dataset
