@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pickle
 
 from flask_openapi3 import OpenAPI, Info
 from pickle import dump
@@ -35,8 +36,8 @@ url = "https://raw.githubusercontent.com/elantunes/mvp-eng-software-para-sistema
 
 # Lê o arquivo
 #dataset = pd.read_csv(url, delimiter=',', usecols=usecols)
-dataset = pd.read_csv(url, nrows=40, delimiter=',')
-#dataset = pd.read_csv(url, nrows=55692, delimiter=',')
+#dataset = pd.read_csv(url, nrows=40000, delimiter=',')
+dataset = pd.read_csv(url, nrows=55692, delimiter=',')
 
 # Mostra as primeiras linhas do dataset
 dataset.head()
@@ -71,8 +72,8 @@ np.random.seed(seed) # definindo uma semente global
 models = []
 
 # Criando os modelos e adicionando-os na lista de modelos
-models.append(('KNN', KNeighborsClassifier()))
-#models.append(('CART', DecisionTreeClassifier()))
+#models.append(('KNN', KNeighborsClassifier()))
+models.append(('CART', DecisionTreeClassifier()))
 #models.append(('NB', GaussianNB()))
 #models.append(('SVM', SVC()))
 
@@ -86,10 +87,6 @@ for name, model in models:
     results.append(cv_results)
     names.append(name)
     msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
-
-    # Salva o modelo no disco
-    filename = f"modelos_ml/fumantes_{name.lower()}.pkl"
-    dump(model, open(filename, 'wb'))
 
     print(msg)
 
@@ -114,8 +111,8 @@ names = []
 # Criando os elementos do pipeline
 
 # Algoritmos que serão utilizados
-knn = ('KNN', KNeighborsClassifier())
-#cart = ('CART', DecisionTreeClassifier())
+#knn = ('KNN', KNeighborsClassifier())
+cart = ('CART', DecisionTreeClassifier())
 #naive_bayes = ('NB', GaussianNB())
 #svm = ('SVM', SVC())
 
@@ -127,20 +124,20 @@ min_max_scaler = ('MinMaxScaler', MinMaxScaler())
 # Montando os pipelines
 
 # Dataset original
-pipelines.append(('KNN-orig', Pipeline([knn])))
-#pipelines.append(('CART-orig', Pipeline([cart])))
+#pipelines.append(('KNN-orig', Pipeline([knn])))
+pipelines.append(('CART-orig', Pipeline([cart])))
 #pipelines.append(('NB-orig', Pipeline([naive_bayes])))
 #pipelines.append(('SVM-orig', Pipeline([svm])))
 
 # Dataset Padronizado
-pipelines.append(('KNN-padr', Pipeline([standard_scaler, knn])))
-#pipelines.append(('CART-padr', Pipeline([standard_scaler, cart])))
+#pipelines.append(('KNN-padr', Pipeline([standard_scaler, knn])))
+pipelines.append(('CART-padr', Pipeline([standard_scaler, cart])))
 #pipelines.append(('NB-padr', Pipeline([standard_scaler, naive_bayes])))
 #pipelines.append(('SVM-padr', Pipeline([standard_scaler, svm])))
 
 # Dataset Normalizado
-pipelines.append(('KNN-norm', Pipeline([min_max_scaler, knn])))
-#pipelines.append(('CART-norm', Pipeline([min_max_scaler, cart])))
+#pipelines.append(('KNN-norm', Pipeline([min_max_scaler, knn])))
+pipelines.append(('CART-norm', Pipeline([min_max_scaler, cart])))
 #pipelines.append(('NB-norm', Pipeline([min_max_scaler, naive_bayes])))
 #pipelines.append(('SVM-norm', Pipeline([min_max_scaler, svm])))
 
@@ -169,18 +166,22 @@ np.random.seed(7) # definindo uma semente global para este bloco
 pipelines = []
 
 # Definindo os componentes do pipeline
-knn = ('KNN', KNeighborsClassifier())
+cart = ('CART', DecisionTreeClassifier())
 standard_scaler = ('StandardScaler', StandardScaler())
 min_max_scaler = ('MinMaxScaler', MinMaxScaler())
 
-pipelines.append(('knn-orig', Pipeline(steps=[knn])))
-pipelines.append(('knn-padr', Pipeline(steps=[standard_scaler, knn])))
-pipelines.append(('knn-norm', Pipeline(steps=[min_max_scaler, knn])))
+pipelines.append(('cart-orig', Pipeline(steps=[cart])))
+pipelines.append(('cart-padr', Pipeline(steps=[standard_scaler, cart])))
+pipelines.append(('cart-norm', Pipeline(steps=[min_max_scaler, cart])))
 
-param_grid = {
-    'KNN__n_neighbors': [1,3,5,7,9,11,13,15,17,19,21],
-    'KNN__metric': ["euclidean", "manhattan", "minkowski"],
-}
+# param_grid = {
+#     'CART__criterion' : ['gini', 'entropy'],
+#     'CART__max_features':[None,'auto','sqrt','log2'],
+#     'CART__max_depth': [None, 3, 4, 5, 6, 10, 12],
+#     'CART__splitter': ['best','random']
+#     }
+
+param_grid = { 'CART__criterion' : ['entropy'] }
 
 # Prepara e executa o GridSearchCV
 for name, model in pipelines:
@@ -195,9 +196,15 @@ for name, model in pipelines:
 # Avaliação do modelo com o conjunto de testes
 
 # Preparação do modelo de treino
-scaler = StandardScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
+# scaler = StandardScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
+# rescaledX = scaler.transform(X_train) # aplicação da padronização no conjunto de treino
+# model = KNeighborsClassifier(metric='manhattan', n_neighbors=21)
+# model.fit(rescaledX, y_train)
+
+# Preparação do modelo de treino
+scaler = MinMaxScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
 rescaledX = scaler.transform(X_train) # aplicação da padronização no conjunto de treino
-model = KNeighborsClassifier(metric='manhattan', n_neighbors=21)
+model = DecisionTreeClassifier(criterion='entropy')
 model.fit(rescaledX, y_train)
 
 # Estimativa da acurácia no conjunto de teste
@@ -207,15 +214,27 @@ print('Estimativa da acurácia no conjunto de teste')
 print(accuracy_score(y_test, predictions))
 
 # Preparação do modelo com TODO o dataset'
-scaler = StandardScaler().fit(X) # ajuste do scaler com TODO o dataset
-rescaledX = scaler.transform(X) # aplicação da padronização com TODO o dataset
-model.fit(rescaledX, y)
+# scaler = StandardScaler().fit(X) # ajuste do scaler com TODO o dataset
+# rescaledX = scaler.transform(X) # aplicação da padronização com TODO o dataset
+# model = KNeighborsClassifier(metric='manhattan', n_neighbors=21)
+# model.fit(rescaledX, y)
+
+#Se faz o modelo com todo ou com o treino?
+# scaler = MinMaxScaler().fit(X) # ajuste do scaler com TODO o dataset
+# rescaledX = scaler.transform(X) # aplicação da padronização com TODO o dataset
+# #model = DecisionTreeClassifier(criterion='entropy')
+# model.fit(rescaledX, y)
+
+# Salva o modelo no disco
+filename = f"modelos_ml/fumantes_knn.pkl"
+#filename = f"modelos_ml/fumantes_{knn_.lower()}.pkl"
+dump(model, open(filename, 'wb'))
 
 # Estimativa da acurácia no conjunto de TODO dataset
-rescaledTestX = scaler.transform(X_test) # aplicação da padronização no conjunto de teste
-predictions = model.predict(rescaledTestX)
+rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
+predictions = model.predict(rescaledX)
 print('Estimativa da acurácia no conjunto de TODO dataset')
-print(accuracy_score(y_test, predictions))
+print(accuracy_score(y, predictions))
 
 
 #Simulando a aplicação do modelo em dados não vistos
@@ -246,35 +265,60 @@ print(accuracy_score(y_test, predictions))
 #         'tártaro,fumante': [1],
 #         }
 
-data = {'idade': [69],
-        'altura(cm)': [170],
+# data = {'idade': [69],
+#         'altura(cm)': [170],
+#         'peso(kg)': [60],
+#         'cintura(cm)': [80],
+#         'visão(esquerda)': [0.8],
+#         'visão(direita)': [0.8],
+#         'audição(esquerda)': [1],
+#         'audição(direita)': [1],
+#         'sistólica': [138],
+#         'relaxado': [86],
+#         'açucar no sangue em jejum': [89],
+#         'colesterol': [242],
+#         'triglicerídos': [182],
+#         'HDL': [55],
+#         'LDL': [151],
+#         'hemoglobina': [15.8],
+#         'proteína na urina': [1],
+#         'creatinina sérica': [1],
+#         'AST': [21],
+#         'ALT': [16],
+#         'Gtp': [22],
+#         'cáries dentárias': [0],
+#         'tártaro': [0]
+#         }
+
+data = {'idade': [27],
+        'altura(cm)': [160],
         'peso(kg)': [60],
-        'cintura(cm)': [80],
+        'cintura(cm)': [81],
         'visão(esquerda)': [0.8],
-        'visão(direita)': [0.8],
+        'visão(direita)': [0.6],
         'audição(esquerda)': [1],
         'audição(direita)': [1],
-        'sistólica': [138],
-        'relaxado': [86],
-        'açucar no sangue em jejum': [89],
-        'colesterol': [242],
-        'triglicerídos': [182],
-        'HDL': [55],
-        'LDL': [151],
-        'hemoglobina': [15.8],
+        'sistólica': [119],
+        'relaxado': [70],
+        'açucar no sangue em jejum': [130],
+        'colesterol': [192],
+        'triglicerídos': [115],
+        'HDL': [42],
+        'LDL': [127],
+        'hemoglobina': [12.7],
         'proteína na urina': [1],
-        'creatinina sérica': [1],
-        'AST': [21],
-        'ALT': [16],
-        'Gtp': [22],
+        'creatinina sérica': [0.6],
+        'AST': [22],
+        'ALT': [19],
+        'Gtp': [18],
         'cáries dentárias': [0],
-        'tártaro,fumante': [1],
+        'tártaro': [1]
         }
 
 atributos = ['idade','altura(cm)','peso(kg)','cintura(cm)','visão(esquerda)','visão(direita)',
              'audição(esquerda)','audição(direita)','sistólica','relaxado','açucar no sangue em jejum',
              'colesterol','triglicerídos','HDL','LDL','hemoglobina','proteína na urina',
-             'creatinina sérica','AST','ALT','Gtp','cáries dentárias','tártaro,fumante']
+             'creatinina sérica','AST','ALT','Gtp','cáries dentárias','tártaro']
 
 entrada = pd.DataFrame(data, columns=atributos)
 
@@ -282,10 +326,49 @@ array_entrada = entrada.values
 X_entrada = array_entrada[:,0:numero_colunas_dataset].astype(float)
 
 # Padronização nos dados de entrada usando o scaler utilizado em X
-rescaledEntradaX = scaler.transform(X_entrada)
-print(rescaledEntradaX)
+#rescaledEntradaX = scaler.transform(X_entrada)
+#print(rescaledEntradaX)
 
 # Predição de classes dos dados de entrada
-saidas = model.predict(rescaledEntradaX)
+saidas = model.predict(X_entrada)
+#saidas = model.predict(rescaledEntradaX)
+print('Saida 1')
 print(saidas)
 
+#################################
+
+ml_path = 'modelos_ml/fumantes_knn.pkl'
+
+modelo = pickle.load(open(ml_path, 'rb'))
+
+X_input = np.array([69,
+                    170,
+                    60,
+                    80,
+                    0.8,
+                    0.8,
+                    1,
+                    1,
+                    138,
+                    86,
+                    89,
+                    242,
+                    182,
+                    55,
+                    151,
+                    15.8,
+                    1,
+                    1,
+                    21,
+                    16,
+                    22,
+                    0,
+                    0
+                ])
+
+
+# Faremos o reshape para que o modelo entenda que estamos passando
+diagnosis = modelo.predict(X_input.reshape(1, -1))
+
+print('Saida 2')
+print(int(diagnosis[0]))
