@@ -1,13 +1,13 @@
+import pickle
+import warnings
+
+from pickle import dump
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import pickle
-import warnings
-warnings.filterwarnings("ignore")
-
 
 from flask_openapi3 import OpenAPI, Info
-from pickle import dump
 from sklearn.metrics import accuracy_score, precision_score
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
@@ -21,33 +21,34 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
+warnings.filterwarnings("ignore")
+
 
 info = Info(title="API do Sitema de Fumantes", version="1.0.0")
 app = OpenAPI(__name__, info=info)
 
-print("Olá!")
+print("Olá!\n")
 
-# CARGA DO DATASET
-
+# Carga do dataset
 print("Obtendo o dataset...")
 
+
 # Informa a URL de importação do dataset
-url = "https://raw.githubusercontent.com/elantunes/mvp-eng-software-para-sistemas-inteligentes/main/datasets/fumantes-reduzido.csv"
+URL = "https://raw.githubusercontent.com/elantunes/mvp-eng-software-para-sistemas-inteligentes/mai\
+n/datasets/fumantes-reduzido.csv"
 
 # Lê o arquivo
-dataset = pd.read_csv(url, delimiter=',')
+dataset = pd.read_csv(URL, delimiter=',')
+
 
 # Mostra as primeiras linhas do dataset
 dataset.head()
-
 print("Dataset obtido!")
 
+
 # Separação em conjunto de treino e conjunto de teste com holdout
-
-test_size = .25 # tamanho do conjunto de teste
-seed = 7 # semente aleatória
-
-# Separação em conjuntos de treino e teste
+TEST_SIZE = .25 # tamanho do conjunto de teste
+SEED = 7 # semente aleatória
 array = dataset.values
 numero_colunas_dataset = len(dataset.columns)-1
 
@@ -55,16 +56,19 @@ X = array[:,0:numero_colunas_dataset]
 y = array[:,numero_colunas_dataset]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y,
-    test_size=test_size, shuffle=True, random_state=seed, stratify=y) # holdout com estratificação
+    test_size=TEST_SIZE, shuffle=True, random_state=SEED, stratify=y) # holdout com estratificação
+
 
 # Parâmetros e partições da validação cruzada
-scoring = 'accuracy'
-num_particoes = 10
-kfold = StratifiedKFold(n_splits=num_particoes, shuffle=True, random_state=seed) # validação cruzada com estratificação
+SCORING = 'accuracy'
+NUM_PARTICOES = 10
+ # validação cruzada com estratificação
+kfold = StratifiedKFold(n_splits=NUM_PARTICOES, shuffle=True, random_state=SEED)
+
 
 # Modelagem e Inferência
+np.random.seed(SEED) # definindo uma semente global
 
-np.random.seed(seed) # definindo uma semente global
 
 # Lista que armazenará os modelos
 models = []
@@ -137,12 +141,13 @@ min_max_scaler = ('MinMaxScaler', MinMaxScaler())
 #pipelines.append(('NB-norm', Pipeline([min_max_scaler, naive_bayes])))
 #pipelines.append(('SVM-norm', Pipeline([min_max_scaler, svm])))
 
+
 # Executando os pipelines
 for name, model in pipelines:
-    cv_results = cross_val_score(model, X, y, cv=kfold, scoring=scoring)
+    cv_results = cross_val_score(model, X, y, cv=kfold, scoring=SCORING)
     results.append(cv_results)
     names.append(name)
-    msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std()) # formatando para 3 casas decimais
+    msg = f"{name} {cv_results.mean()} {cv_results.std()}"
     print(msg)
 
 print('\n')
@@ -177,7 +182,7 @@ param_grid = { 'CART__criterion' : ['entropy'] }
 #     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=scoring, cv=kfold)
 #     grid.fit(X_train, y_train)
     # imprime a melhor configuração
-    #print("Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_))
+    #print("Sem tratamento de missings: %s - Melhor: %f usando\ %s" % (name, grid.best_score_, grid.best_params_))
 
 
 # Finalização do Modelo
@@ -195,8 +200,10 @@ param_grid = { 'CART__criterion' : ['entropy'] }
 # Preparação do modelo de treino
 scaler = MinMaxScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
 rescaledX = scaler.transform(X_train) # aplicação da normalização no conjunto de treino
+ # aplicação da hiperparametrização no conjunto de treino
 modelCart = DecisionTreeClassifier(criterion='entropy')
 modelCart.fit(rescaledX, y_train)
+
 
 # Estimativa da acurácia no conjunto de teste
 # rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
@@ -219,17 +226,18 @@ modelCart.fit(rescaledX, y_train)
 # model.fit(rescaledX, y)
 
 # Estimativa da acurácia no conjunto de TODO dataset
-# rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
-# predictions = modelCart.predict(rescaledX)
-# print(accuracy_score(y, predictions))
-# print('Estimativa da precisão no conjunto do dataset (CART)')
-# print(precision_score(y, predictions))
-# print('\n')
+rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
+predictions = modelCart.predict(rescaledX)
+print('Estimativa do conjunto do dataset (CART):')
+print(f'Acurácia: {accuracy_score(y, predictions)}')
+print(f'Precisão: {precision_score(y, predictions)}')
+print('\n')
+
 
 # Salva o modelo no disco
-filename = f"modelos_ml/fumantes.pkl"
+#filename = f"modelos_ml/fumantes.pkl"
 #filename = f"modelos_ml/fumantes_{knn_.lower()}.pkl"
-dump(modelCart, open(filename, 'wb'))
+#dump(modelCart, open(filename, 'wb'))
 
 
 # SVM ############################################################################################
@@ -240,6 +248,7 @@ rescaledX = scaler.transform(X_train) # aplicação da normalização no conjunt
 modelSVM = SVC()
 modelSVM.fit(rescaledX, y_train)
 
+
 # Estimativa da acurácia no conjunto de teste
 # rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
 # predictions = modelSVM.predict(rescaledTestX)
@@ -248,13 +257,15 @@ modelSVM.fit(rescaledX, y_train)
 # print('Estimativa da precisão no conjunto de teste (SVM)')
 # print(precision_score(y_test, predictions))
 
+
 # Estimativa da acurácia no conjunto de TODO dataset
-# rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
-# predictions = modelSVM.predict(rescaledX)
-# print('Estimativa da acurácia no conjunto do dataset (SVM)')
-# print(accuracy_score(y, predictions))
-# print('Estimativa da precisão no conjunto do dataset (SVM)')
-# print(precision_score(y, predictions))
+rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
+predictions = modelSVM.predict(rescaledX)
+print('Estimativa do conjunto do dataset (SVM):')
+print(f'Acurácia: {accuracy_score(y, predictions)}')
+print(f'Precisão: {precision_score(y, predictions)}')
+print('\n')
+
 
 ##################################################################################################
 
@@ -286,58 +297,60 @@ modelSVM.fit(rescaledX, y_train)
 #         'tártaro,fumante': [1],
 #         }
 
-data = {'idade': [69],
-        'altura(cm)': [170],
-        'peso(kg)': [60],
-        'cintura(cm)': [80],
-        'visão(esquerda)': [0.8],
-        'visão(direita)': [0.8],
-        'audição(esquerda)': [1],
-        'audição(direita)': [1],
-        'sistólica': [138],
-        'relaxado': [86],
-        'açucar no sangue em jejum': [89],
-        'colesterol': [242],
-        'triglicerídos': [182],
-        'HDL': [55],
-        'LDL': [151],
-        'hemoglobina': [15.8],
-        'proteína na urina': [1],
-        'creatinina sérica': [1],
-        'AST': [21],
-        'ALT': [16],
-        'Gtp': [22],
-        'cáries dentárias': [0],
-        'tártaro': [0]
-        }
-
-# data = {'idade': [27],
-#         'altura(cm)': [160],
+# data = {'idade': [69],
+#         'altura(cm)': [170],
 #         'peso(kg)': [60],
-#         'cintura(cm)': [81],
+#         'cintura(cm)': [80],
 #         'visão(esquerda)': [0.8],
-#         'visão(direita)': [0.6],
+#         'visão(direita)': [0.8],
 #         'audição(esquerda)': [1],
 #         'audição(direita)': [1],
-#         'sistólica': [119],
-#         'relaxado': [70],
-#         'açucar no sangue em jejum': [130],
-#         'colesterol': [192],
-#         'triglicerídos': [115],
-#         'HDL': [42],
-#         'LDL': [127],
-#         'hemoglobina': [12.7],
+#         'sistólica': [138],
+#         'relaxado': [86],
+#         'açucar no sangue em jejum': [89],
+#         'colesterol': [242],
+#         'triglicerídos': [182],
+#         'HDL': [55],
+#         'LDL': [151],
+#         'hemoglobina': [15.8],
 #         'proteína na urina': [1],
-#         'creatinina sérica': [0.6],
-#         'AST': [22],
-#         'ALT': [19],
-#         'Gtp': [18],
+#         'creatinina sérica': [1],
+#         'AST': [21],
+#         'ALT': [16],
+#         'Gtp': [22],
 #         'cáries dentárias': [0],
-#         'tártaro': [1]
+#         'tártaro': [0]
 #         }
 
+
+data = {'idade': [27],
+        'altura(cm)': [160],
+        'peso(kg)': [60],
+        'cintura(cm)': [81],
+        'visão(esquerda)': [0.8],
+        'visão(direita)': [0.6],
+        'audição(esquerda)': [1],
+        'audição(direita)': [1],
+        'sistólica': [119],
+        'relaxado': [70],
+        'açucar no sangue em jejum': [130],
+        'colesterol': [192],
+        'triglicerídos': [115],
+        'HDL': [42],
+        'LDL': [127],
+        'hemoglobina': [12.7],
+        'proteína na urina': [1],
+        'creatinina sérica': [0.6],
+        'AST': [22],
+        'ALT': [19],
+        'Gtp': [18],
+        'cáries dentárias': [0],
+        'tártaro': [1]
+        }
+
 atributos = ['idade','altura(cm)','peso(kg)','cintura(cm)','visão(esquerda)','visão(direita)',
-             'audição(esquerda)','audição(direita)','sistólica','relaxado','açucar no sangue em jejum',
+             'audição(esquerda)','audição(direita)','sistólica',
+             'relaxado','açucar no sangue em jejum',
              'colesterol','triglicerídos','HDL','LDL','hemoglobina','proteína na urina',
              'creatinina sérica','AST','ALT','Gtp','cáries dentárias','tártaro']
 
@@ -346,44 +359,56 @@ entrada = pd.DataFrame(data, columns=atributos)
 array_entrada = entrada.values
 X_entrada = array_entrada[:,0:numero_colunas_dataset].astype(float)
 
+
 # Padronização nos dados de entrada usando o scaler utilizado em X
-#rescaledEntradaX = scaler.transform(X_entrada)
+rescaledEntradaX = scaler.transform(X_entrada)
 #print(rescaledEntradaX)
 
 model = modelSVM
 
 # Predição de classes dos dados de entrada
-saidas = model.predict(X_entrada)
-#saidas = model.predict(rescaledEntradaX)
-print('Saida 1')
-print(saidas)
+#saidas = model.predict(X_entrada)
+saidas = model.predict(rescaledEntradaX)
+#print('Saida 1')
+#print(saidas)
 
 #################################
 
-ml_path = 'modelos_ml/fumantes.pkl'
+scaler = StandardScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
+rescaledX = scaler.transform(X_train) # aplicação da normalização no conjunto de treino
+modelSVM = SVC()
+modelSVM.fit(rescaledX, y_train)
 
-X_input = np.array([27,160,60,81,.8,.6,1,1,119,70,130,192,115,42,127,12.7,1,.6,22,19,18,0,1])
-diagnosis = model.predict(X_input.reshape(1, -1))
-print('Saida 1 (27 - Esperado:0)')
-print(int(diagnosis[0]))
+model = modelSVM
 
-X_input = np.array([69,170,60,80,0.8,0.8,1,1,138,86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
-# Faremos o reshape para que o modelo entenda que estamos passando
-diagnosis = model.predict(X_input.reshape(1, -1))
-print('Saida 2 (69 - Esperado:1)')
-print(int(diagnosis[0]))
+#ml_path = 'modelos_ml/fumantes.pkl'
 
-X_input = np.array([82,150,65,81.5,1.2,1.2,1,1,134,86,86,238,117,63,152,12,1,0.9,19,11,16,0,0])
-diagnosis = model.predict(X_input.reshape(1, -1))
-print('Saida 3 (82 - Esperado:0)')
-print(int(diagnosis[0]))
+X_input = np.array([27,160,60,81,.8,.6,1,1,119,
+70,130,192,115,42,127,12.7,1,.6,22,19,18,0,1])
+rescaledEntradaX = scaler.transform(X_input.reshape(1, -1))
+diagnosis = model.predict(rescaledEntradaX)
+print(f'#1\t {int(X_input[0])}\t Esperado:0\t Atingido:{int(diagnosis[0])}')
 
-X_input = np.array([31,160,60,86.0,0.7,0.6,1.0,1.0,133.0,80.0,139.0,223.0,151.0,44.0,149.0,16.3,1.0,1.1,26.0,34.0,38.0,0,1])
-diagnosis = model.predict(X_input.reshape(1, -1))
-print('Saida 4 (31 - Esperado:1)')
-print(int(diagnosis[0]))
+X_input = np.array([69,170,60,80,.8,.8,1,1,138,
+86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
+rescaledEntradaX = scaler.transform(X_input.reshape(1, -1))
+diagnosis = model.predict(rescaledEntradaX)
+print(f'#2\t {int(X_input[0])}\t Esperado:1\t Atingido:{int(diagnosis[0])}')
 
-X_input = np.array([71,165,65,84.0,1.0,1.0,1.0,1.0,120.0,76.0,95.0,235.0,132.0,52.0,166.0,13.7,4.0,0.9,29.0,24.0,13.0,0,0])
-diagnosis = model.predict(X_input.reshape(1, -1))
-print('Saida 5 (71 - Esperado:0)')
-print(int(diagnosis[0]))
+X_input = np.array([82,150,65,81.5,1.2,1.2,1,1,134,
+86,86,238,117,63,152,12,1,0.9,19,11,16,0,0])
+rescaledEntradaX = scaler.transform(X_input.reshape(1, -1))
+diagnosis = model.predict(rescaledEntradaX)
+print(f'#3\t {int(X_input[0])}\t Esperado:0\t Atingido:{int(diagnosis[0])}')
+
+X_input = np.array([31,160,60,86,.7,.6,1,1,133,
+80,139,223,151,44,149,16.3,1,1.1,26,34,38,0,1])
+rescaledEntradaX = scaler.transform(X_input.reshape(1, -1))
+diagnosis = model.predict(rescaledEntradaX)
+print(f'#4\t {int(X_input[0])}\t Esperado:1\t Atingido:{int(diagnosis[0])}')
+
+X_input = np.array([71,165,65,84,1,1,1,1,120,
+76,95,235,132,52,166,13.7,4,.9,29,24,13,0,0])
+rescaledEntradaX = scaler.transform(X_input.reshape(1, -1))
+diagnosis = model.predict(rescaledEntradaX)
+print(f'#5\t {int(X_input[0])}\t Esperado:0\t Atingido:{int(diagnosis[0])}')
