@@ -7,4 +7,5 @@ flask_openapi3==2.4.0
 matplotlib
 pandas
 pickles
+pydantic
 scikit-learn
