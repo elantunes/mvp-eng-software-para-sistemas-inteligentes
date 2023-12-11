@@ -41,13 +41,13 @@ predicoes_tag = Tag(name="Predicao", description="Verifica se o cliente é um " 
 
 
 # obter o dataset
-dataset = Dataset.abrir_dataset_do_disco('datasets/fumantes-reduzido.csv')
+dataset = Dataset.abrir_dataset_do_disco('datasets/fumantes.csv')
 
 # pré-processar
 X_train, X_test, y_train, y_test = PreProcessador.processar(dataset)
 
 # normalizar
-NOME_ARQUIVO_SCALER = 'scalers/fumantes'
+NOME_ARQUIVO_SCALER = 'scalers/fumantes-scaler.pkl'
 scaler = Normalizador.configurar_scaler(X_train)
 Normalizador.salvar_scaler_em_disco(scaler, NOME_ARQUIVO_SCALER)
 
@@ -58,7 +58,7 @@ X_rescaled = Normalizador.aplicar_scaler(X_train, scaler)
 modelCart = DecisionTreeClassifier(criterion='entropy')
 modelCart.fit(X_rescaled, y_train)
 
-NOME_ARQUIVO_MODELO = 'modelos_ml/fumantes.pkl'
+NOME_ARQUIVO_MODELO = 'modelos_ml/fumantes-modelo.pkl'
 ModeloMl.salvar_em_disco(modelCart, NOME_ARQUIVO_MODELO)
 
 modelCart = ModeloMl.abrir_do_disco(NOME_ARQUIVO_MODELO)
@@ -102,7 +102,7 @@ def verifica_predicao(form: PredicaoPostFormSchema):
         xinput = np.array([form.idade,170,60,80,.8,.8,1,1,138,
             86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
 
-        modelo = ModeloMl("modelos_ml/fumantes.pkl")
+        modelo = ModeloMl("modelos_ml/fumantes-modelo.pkl")
         predicao = modelo.predizer(xinput)
 
         predicao = Predicao(
