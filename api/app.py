@@ -1,30 +1,30 @@
 """Módulo para ignorar warnings."""
-import warnings
+#import warnings
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from flask import redirect, request
+from flask import redirect
 from flask_openapi3 import OpenAPI, Info, Tag
-from logger import logger
-from schemas import *
-from sklearn.metrics import accuracy_score, precision_score
+#from sklearn.metrics import accuracy_score, precision_score
 from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import GridSearchCV
+#from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.pipeline import Pipeline
+#from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
+from logger import logger
+from model import Predicao
 from model.modelo_ml import ModeloMl
-
-warnings.filterwarnings("ignore")
+from schemas.error import ErrorSchema
+from schemas import *
 
 
 info = Info(title="API do Sistema de Fumantes", version="1.0.0")
@@ -60,41 +60,21 @@ def verifica_predicao(form: PredicaoPostFormSchema):
     """Verifica a predição de um cliente"""
     try:
 
-        logger.debug("Incluindo um aluguel")
+        logger.debug("Iniciando a predição...")
 
         xinput = np.array([form.idade,170,60,80,.8,.8,1,1,138,
-86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
+            86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
 
-        NOME_ARQUIVO_MODELO_ML = "modelos_ml/fumantes.pkl"
-        modelo = ModeloMl(NOME_ARQUIVO_MODELO_ML)
+        modelo = ModeloMl("modelos_ml/fumantes.pkl")
         predicao = modelo.predizer(xinput)
 
-        # session = Session()
+        predicao = Predicao(
+            fumante = predicao
+        )
 
-        # veiculo = session.get(Veiculo, form.id_veiculo)
+        logger.debug("Predição obtida com sucesso!")
 
-        # aluguel = Aluguel(
-        #     id = None,
-        #     id_cliente = form.id_cliente,
-        #     id_veiculo = form.id_veiculo,
-        #     data_inicio = form.data_inicio,
-        #     data_termino = form.data_termino,
-        #     valor = veiculo.valor_diaria * ((form.data_termino - form.data_inicio).days + 1),
-        #     cliente = None,
-        #     veiculo = None
-        # )
-
-        # session.add(aluguel)
-        # session.commit()
-
-        # cliente = session.get(Cliente, aluguel.id_cliente)
-
-        # aluguel.cliente = cliente
-        # aluguel.veiculo = veiculo
-
-        logger.debug("Aluguel incluído com sucesso!")
-        
-        return show_aluguel(aluguel), 200
+        return show_predicao(predicao), 200
 
     except Exception as e:
         logger.warning(f"Erro ao adicionar um aluguel, {e}")

@@ -68,8 +68,8 @@ class PredicaoViewSchema(BaseModel):
 
 # Defs
 
-def show_aluguel(predicao: Predicao):
-    """ Retorna uma representação do aluguel seguindo o schema definido em
+def show_predicao(predicao: Predicao):
+    """ Retorna uma representação da Predição seguindo o schema definido em
         PredicaoViewSchema.
     """
 
