@@ -335,11 +335,31 @@ NOME_ARQUIVO_MODELO_ML = "modelos_ml/fumantes.pkl"
 #scaler = MinMaxScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
 #model = modelCart
 
-modelo = ModeloMl(NOME_ARQUIVO_MODELO_ML)
+#modelo = ModeloMl(NOME_ARQUIVO_MODELO_ML)
+modelo = ModeloMl.abrir_do_disco(NOME_ARQUIVO_MODELO)
+scaler = Normalizador.abrir_scaler_do_disco(NOME_ARQUIVO_SCALER)
 
 X_input = np.array([27,160,60,81,.8,.6,1,1,119,
 70,130,192,115,42,127,12.7,1,.6,22,19,18,0,1])
-print(modelo.predizer(X_input))
+print(ModeloMl.predizer(modelo, scaler, X_input))
+
+X_input = np.array([69,170,60,80,.8,.8,1,1,138,
+86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
+print(ModeloMl.predizer(modelo, scaler, X_input))
+
+X_input = np.array([82,150,65,81.5,1.2,1.2,1,1,134,
+86,86,238,117,63,152,12,1,0.9,19,11,16,0,0])
+print(ModeloMl.predizer(modelo, scaler, X_input))
+
+X_input = np.array([31,160,60,86,.7,.6,1,1,133,
+80,139,223,151,44,149,16.3,1,1.1,26,34,38,0,1])
+print(ModeloMl.predizer(modelo, scaler, X_input))
+
+X_input = np.array([71,165,65,84,1,1,1,1,120,
+76,95,235,132,52,166,13.7,4,.9,29,24,13,0,0])
+print(ModeloMl.predizer(modelo, scaler, X_input))
+
+print('pausa')
 
 X_input = np.array([69,170,60,80,.8,.8,1,1,138,
 86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])

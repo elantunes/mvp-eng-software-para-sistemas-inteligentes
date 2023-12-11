@@ -1,6 +1,8 @@
 """Módulo para escrever arquivo em disco."""
 import pickle
 
+from numpy import ndarray
+
 
 class ModeloMl():
     """Classe que para manipular um arquivo de Modelo de Machine Learning"""
@@ -10,9 +12,10 @@ class ModeloMl():
         return pickle.load(open(file_name, 'rb'))
     
 
-    def predizer(modelo, dados):
+    def predizer(modelo, scaler, dados:ndarray):
         """Faz a predição dos valores (0 ou 1)"""
-        diagnostico = modelo.predict(dados.reshape(1, -1))
+        rescaled = scaler.transform(dados.reshape(1, -1))
+        diagnostico = modelo.predict(rescaled)
         return int(diagnostico[0])
 
 
