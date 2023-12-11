@@ -1,0 +1,84 @@
+input[type='date'],
+input[type='text'],
+input[type='number'],
+select {
+    background-color: white;
+    border: 3px solid #ebf3f8;
+    border-radius: 10px;
+    box-sizing: border-box;
+    font-family: Roboto;
+    font-size: 11pt;
+    outline: none;
+    padding: 12px 12px;
+}
+
+input[type='date']:focus,
+input[type='text']:focus,
+input[type='number']:focus {
+    border-color: #f1520a;
+}
+
+input[type='text']:disabled {
+    background-color: #efefef;
+}
+
+.modal-rodape-botoes {
+    display: flex;
+    flex-flow: row;
+    padding-top: 40px;
+}
+
+.rotulo-input {
+    font-size: 11pt;
+    padding: 10px 0;
+}
+
+
+/********************
+ Botões
+********************/
+
+.btnAzul,
+.btnPrimario,
+.btnSecundario {
+    border: 2px solid transparent;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font: 13px Roboto;
+    letter-spacing: 1pt;
+    margin: 10px;
+    padding: 10px 20px;
+}
+
+.btnPrimario {
+    background-color: #ff4500;
+    transition: 0.3s;
+}
+
+.btnPrimario:hover {
+    background-color: #ae1407;
+}
+
+.btnAzul {
+    background-color: #1F75FE;
+    transition: 0.3s;
+}
+
+.btnAzul:disabled {
+    background-color: #B9D9EB;
+}
+
+.btnAzul:hover:not(:disabled) {
+    background-color: #2a52be;
+}
+
+.btnSecundario {
+    background-color: white;
+    color: #ff4500;
+}
+
+.btnSecundario:hover {
+    color: #ae1407;
+    border-color: #ae1407;
+}
