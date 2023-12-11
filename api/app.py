@@ -47,7 +47,7 @@ dataset = Dataset.abrir_dataset_do_disco('datasets/fumantes-reduzido.csv')
 X_train, X_test, y_train, y_test = PreProcessador.processar(dataset)
 
 # normalizar
-NOME_ARQUIVO_SCALER = 'scalers/fumantes-reduzido'
+NOME_ARQUIVO_SCALER = 'scalers/fumantes'
 scaler = Normalizador.configurar_scaler(X_train)
 Normalizador.salvar_scaler_em_disco(scaler, NOME_ARQUIVO_SCALER)
 
@@ -57,6 +57,11 @@ X_rescaled = Normalizador.aplicar_scaler(X_train, scaler)
 # aplicação da hiperparametrização no conjunto de treino
 modelCart = DecisionTreeClassifier(criterion='entropy')
 modelCart.fit(X_rescaled, y_train)
+
+NOME_ARQUIVO_MODELO = 'modelos_ml/fumantes.pkl'
+ModeloMl.salvar_em_disco(modelCart, NOME_ARQUIVO_MODELO)
+
+modelCart = ModeloMl.abrir_do_disco(NOME_ARQUIVO_MODELO)
 
 # Estimativa da acurácia no conjunto de teste
 rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
