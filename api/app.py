@@ -165,7 +165,7 @@ for name, model in pipelines:
     grid.fit(X_train, y_train)
     #imprime a melhor configuração
     print(f'Sem tratamento de missings: {name} - '\
-        'Melhor: {grid.best_score_} usando: {grid.best_params_}')
+        f'Melhor: {grid.best_score_} usando: {grid.best_params_}')
 
 print('\n')
 
@@ -188,19 +188,17 @@ modelCart.fit(rescaledX, y_train)
 # Estimativa da acurácia no conjunto de teste
 rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
 predictions = modelCart.predict(rescaledTestX)
-print('Estimativa da acurácia no conjunto de teste (CART)')
-print(accuracy_score(y_test, predictions))
-print('Estimativa da precisão no conjunto de teste (CART)')
-print(precision_score(y_test, predictions))
+print('Estimativas do dataset de teste usando CART')
+print(f'Acurácia: {accuracy_score(y_test, predictions)}')
+print(f'Precisão: {arredonda(precision_score(y_test, predictions))}')
 
 
 # Estimativa da acurácia no conjunto de TODO dataset
 rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
 predictions = modelCart.predict(rescaledX)
-print('Estimativa da acurácia no conjunto de teste (CART)')
-print(accuracy_score(y, predictions))
-print('Estimativa da precisão no conjunto de teste (CART)')
-print(precision_score(y, predictions))
+print('Estimativas do dataset completo usando CART:')
+print(f'Acurácia: {accuracy_score(y, predictions)}')
+print(f'Precisão: {arredonda(precision_score(y, predictions))}')
 
 
 # SVM ############################################################################################
@@ -215,7 +213,7 @@ modelSVM.fit(rescaledX, y_train)
 # Estimativa da acurácia no conjunto de teste
 rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
 predictions = modelSVM.predict(rescaledTestX)
-print('Estimativa do conjunto do dataset (SVM):')
+print('Estimativas do dataset de teste usando SVM:')
 print(f'Acurácia: {accuracy_score(y_test, predictions)}')
 print(f'Precisão: {arredonda(precision_score(y_test, predictions))}')
 
@@ -223,7 +221,7 @@ print(f'Precisão: {arredonda(precision_score(y_test, predictions))}')
 # Estimativa da acurácia no conjunto de TODO dataset
 rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
 predictions = modelSVM.predict(rescaledX)
-print('Estimativa do conjunto do dataset (SVM):')
+print('Estimativas do dataset completo usando SVM:')
 print(f'Acurácia: {accuracy_score(y, predictions)}')
 print(f'Precisão: {arredonda(precision_score(y, predictions))}')
 print('\n')
