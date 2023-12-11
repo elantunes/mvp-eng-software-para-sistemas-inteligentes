@@ -1,5 +1,5 @@
 """Módulo para escrever arquivo em disco."""
-from pickle import dump
+import pandas as pd
 import pickle
 
 
@@ -9,8 +9,7 @@ class ModeloMl():
     def __abrir_do_disco(self, file_name:str):
         '""Abre o modelo do disco.""'
         return pickle.load(open(file_name, 'rb'))
-
-
+    
     def __init__(self, file_name:str):
         """__init__"""
         self.file_name = file_name
@@ -26,4 +25,5 @@ class ModeloMl():
     def salvar_em_disco(self, modelo):
         """Salva o modelo em disco."""
         # Salva o modelo no disco
-        dump(modelo, open(self.file_name, "wb"))
+        pickle.dump(modelo, open(self.file_name, "wb"))
+        pickle.close()

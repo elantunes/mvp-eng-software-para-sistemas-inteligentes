@@ -7,7 +7,8 @@ import pandas as pd
 
 from flask import redirect
 from flask_openapi3 import OpenAPI, Info, Tag
-#from sklearn.metrics import accuracy_score, precision_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import accuracy_score, precision_score
 from sklearn.model_selection import cross_val_score
 #from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedKFold
@@ -21,8 +22,10 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 from logger import logger
-from model import Predicao
+from model import Dataset, Predicao
 from model.modelo_ml import ModeloMl
+from model.normalizador import Normalizador
+from model.pre_processador import PreProcessador
 from schemas.error import ErrorSchema
 from schemas import *
 
@@ -35,6 +38,35 @@ home_tag = Tag(name="Documentação", description="Seleção de documentação: 
     "Redoc ou RapiDoc.")
 predicoes_tag = Tag(name="Predicao", description="Verifica se o cliente é um " \
     "fumante ou não.")
+
+
+# obter o dataset
+dataset = Dataset.abrir_dataset_do_disco('datasets/fumantes-reduzido.csv')
+
+# pré-processar
+X_train, X_test, y_train, y_test = PreProcessador.processar(dataset)
+
+# normalizar
+NOME_ARQUIVO_SCALER = 'scalers/fumantes-reduzido'
+scaler = Normalizador.configurar_scaler(X_train)
+Normalizador.salvar_scaler_em_disco(scaler, NOME_ARQUIVO_SCALER)
+
+scaler = Normalizador.abrir_scaler_do_disco(NOME_ARQUIVO_SCALER)
+X_rescaled = Normalizador.aplicar_scaler(X_train, scaler)
+
+# aplicação da hiperparametrização no conjunto de treino
+modelCart = DecisionTreeClassifier(criterion='entropy')
+modelCart.fit(X_rescaled, y_train)
+
+# Estimativa da acurácia no conjunto de teste
+rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
+predictions = modelCart.predict(rescaledTestX)
+print('Estimativas do dataset de teste usando CART:')
+print(f'Acurácia\t {accuracy_score(y_test, predictions)}')
+print(f'Precisão\t {precision_score(y_test, predictions)}')
+print('\n')
+
+vvvv = 1
 
 ################################################################################
 # GET
