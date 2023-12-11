@@ -17,7 +17,28 @@ class PredicaoPostFormSchema(BaseModel):
     """ Define como uma nova predição a ser verificada deve ser representado.
     """
     idade: int
-    #idade,altura(cm),peso(kg),cintura(cm),visão(esquerda),visão(direita),audição(esquerda),audição(direita),sistólica,relaxado,açucar no sangue em jejum,colesterol,triglicerídos,HDL,LDL,hemoglobina,proteína na urina,creatinina sérica,AST,ALT,Gtp,cáries dentárias,tártaro,fumante
+    altura: int
+    peso: int
+    cintura: float
+    visao_esquerda: float
+    visao_direita: float
+    audicao_esquerda: float
+    audicao_direita: float
+    sistolica: float
+    relaxado: float
+    acucar_no_sangue_em_jejum: float
+    colesterol: float
+    trigliceridos: float
+    HDL: float
+    LDL: float
+    hemoglobina: float
+    proteina_na_urina: float
+    creatinina_serica: float
+    AST: float
+    ALT: float
+    Gtp: float
+    caries_dentarias:bool
+    tartaro:bool
 
 
 # class AluguelPutFormSchema(BaseModel):

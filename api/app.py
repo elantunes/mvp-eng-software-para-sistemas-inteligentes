@@ -40,38 +40,38 @@ predicoes_tag = Tag(name="Predicao", description="Verifica se o cliente é um " 
     "fumante ou não.")
 
 
-# obter o dataset
-dataset = Dataset.abrir_dataset_do_disco('datasets/fumantes.csv')
+# # obter o dataset
+# dataset = Dataset.abrir_dataset_do_disco('datasets/fumantes.csv')
 
-# pré-processar
-X_train, X_test, y_train, y_test = PreProcessador.processar(dataset)
+# # pré-processar
+# X_train, X_test, y_train, y_test = PreProcessador.processar(dataset)
 
-# normalizar
-NOME_ARQUIVO_SCALER = 'scalers/fumantes-scaler.pkl'
-scaler = Normalizador.configurar_scaler(X_train)
-Normalizador.salvar_scaler_em_disco(scaler, NOME_ARQUIVO_SCALER)
+# # normalizar
+# NOME_ARQUIVO_SCALER = 'scalers/fumantes-scaler.pkl'
+# scaler = Normalizador.configurar_scaler(X_train)
+# Normalizador.salvar_scaler_em_disco(scaler, NOME_ARQUIVO_SCALER)
 
-scaler = Normalizador.abrir_scaler_do_disco(NOME_ARQUIVO_SCALER)
-X_rescaled = Normalizador.aplicar_scaler(X_train, scaler)
+# scaler = Normalizador.abrir_scaler_do_disco(NOME_ARQUIVO_SCALER)
+# X_rescaled = Normalizador.aplicar_scaler(X_train, scaler)
 
-# aplicação da hiperparametrização no conjunto de treino
-modelCart = DecisionTreeClassifier(criterion='entropy')
-modelCart.fit(X_rescaled, y_train)
+# # aplicação da hiperparametrização no conjunto de treino
+# modelCart = DecisionTreeClassifier(criterion='entropy')
+# modelCart.fit(X_rescaled, y_train)
 
-NOME_ARQUIVO_MODELO = 'modelos_ml/fumantes-modelo.pkl'
-ModeloMl.salvar_em_disco(modelCart, NOME_ARQUIVO_MODELO)
+# NOME_ARQUIVO_MODELO = 'modelos_ml/fumantes-modelo.pkl'
+# ModeloMl.salvar_em_disco(modelCart, NOME_ARQUIVO_MODELO)
 
-modelCart = ModeloMl.abrir_do_disco(NOME_ARQUIVO_MODELO)
+# modelCart = ModeloMl.abrir_do_disco(NOME_ARQUIVO_MODELO)
 
-# Estimativa da acurácia no conjunto de teste
-rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
-predictions = modelCart.predict(rescaledTestX)
-print('Estimativas do dataset de teste usando CART:')
-print(f'Acurácia\t {accuracy_score(y_test, predictions)}')
-print(f'Precisão\t {precision_score(y_test, predictions)}')
-print('\n')
+# # Estimativa da acurácia no conjunto de teste
+# rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
+# predictions = modelCart.predict(rescaledTestX)
+# print('Estimativas do dataset de teste usando CART:')
+# print(f'Acurácia\t {accuracy_score(y_test, predictions)}')
+# print(f'Precisão\t {precision_score(y_test, predictions)}')
+# print('\n')
 
-vvvv = 1
+# vvvv = 1
 
 ################################################################################
 # GET
@@ -99,11 +99,37 @@ def verifica_predicao(form: PredicaoPostFormSchema):
 
         logger.debug("Iniciando a predição...")
 
-        xinput = np.array([form.idade,170,60,80,.8,.8,1,1,138,
-            86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
+        xinput = np.array([
+            form.idade,
+            form.altura,
+            form.peso,
+            form.cintura,
+            form.visao_esquerda,
+            form.visao_direita,
+            form.audicao_esquerda,
+            form.audicao_direita,
+            form.sistolica,
+            form.relaxado,
+            form.acucar_no_sangue_em_jejum,
+            form.colesterol,
+            form.trigliceridos,
+            form.HDL,
+            form.LDL,
+            form.hemoglobina,
+            form.proteina_na_urina,
+            form.creatinina_serica,
+            form.AST,
+            form.ALT,
+            form.Gtp,
+            form.caries_dentarias,
+            form.tartaro])
+        
+        # xinput = np.array([form.idade,170,60,80,.8,.8,1,1,138,
+        #     86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
 
-        modelo = ModeloMl("modelos_ml/fumantes-modelo.pkl")
-        predicao = modelo.predizer(xinput)
+        modelo = ModeloMl.abrir_do_disco('modelos_ml/fumantes-modelo.pkl')
+        scaler = Normalizador.abrir_scaler_do_disco('scalers/fumantes-scaler.pkl')
+        predicao = (bool)(ModeloMl.predizer(modelo, scaler, xinput))
 
         predicao = Predicao(
             fumante = predicao
@@ -129,277 +155,277 @@ def verifica_predicao(form: PredicaoPostFormSchema):
 #     return int(diagnostico[0])
 
 
-print("Olá!\n")
+# print("Olá!\n")
 
-# Carga do dataset
-print("Obtendo o dataset...")
-
-
-# Informa a URL de importação do dataset
-URL = 'https://raw.githubusercontent.com/elantunes/mvp-eng-software-para-sistemas-inteligentes/'\
-      'main/datasets/fumantes-reduzido.csv'
-
-# Lê o arquivo
-dataset = pd.read_csv(URL, delimiter=',')
+# # Carga do dataset
+# print("Obtendo o dataset...")
 
 
-# Mostra as primeiras linhas do dataset
-dataset.head()
-print("Dataset obtido!\n")
+# # Informa a URL de importação do dataset
+# URL = 'https://raw.githubusercontent.com/elantunes/mvp-eng-software-para-sistemas-inteligentes/'\
+#       'main/datasets/fumantes-reduzido.csv'
+
+# # Lê o arquivo
+# dataset = pd.read_csv(URL, delimiter=',')
 
 
-# Separação em conjunto de treino e conjunto de teste com holdout
-TEST_SIZE = .25 # tamanho do conjunto de teste
-SEED = 7 # semente aleatória
-array = dataset.values
-numero_colunas_dataset = len(dataset.columns)-1
-
-X = array[:,0:numero_colunas_dataset]
-y = array[:,numero_colunas_dataset]
-
-X_train, X_test, y_train, y_test = train_test_split(X, y,
-    test_size=TEST_SIZE, shuffle=True, random_state=SEED, stratify=y) # holdout com estratificação
+# # Mostra as primeiras linhas do dataset
+# dataset.head()
+# print("Dataset obtido!\n")
 
 
-# Parâmetros e partições da validação cruzada
-SCORING = 'accuracy'
-NUM_PARTICOES = 10
- # validação cruzada com estratificação
-kfold = StratifiedKFold(n_splits=NUM_PARTICOES, shuffle=True, random_state=SEED)
+# # Separação em conjunto de treino e conjunto de teste com holdout
+# TEST_SIZE = .25 # tamanho do conjunto de teste
+# SEED = 7 # semente aleatória
+# array = dataset.values
+# numero_colunas_dataset = len(dataset.columns)-1
+
+# X = array[:,0:numero_colunas_dataset]
+# y = array[:,numero_colunas_dataset]
+
+# X_train, X_test, y_train, y_test = train_test_split(X, y,
+#     test_size=TEST_SIZE, shuffle=True, random_state=SEED, stratify=y) # holdout com estratificação
 
 
-# Modelagem e Inferência
-np.random.seed(SEED) # definindo uma semente global
+# # Parâmetros e partições da validação cruzada
+# SCORING = 'accuracy'
+# NUM_PARTICOES = 10
+#  # validação cruzada com estratificação
+# kfold = StratifiedKFold(n_splits=NUM_PARTICOES, shuffle=True, random_state=SEED)
 
 
-# Lista que armazenará os modelos
-models = []
+# # Modelagem e Inferência
+# np.random.seed(SEED) # definindo uma semente global
 
 
-# Listas para armazenar os armazenar os pipelines e os resultados para todas as visões do dataset
-pipelines = []
-results = []
-names = []
+# # Lista que armazenará os modelos
+# models = []
 
 
-# Criando os elementos do pipeline
-
-# Algoritmos que serão utilizados
-knn = ('KNN', KNeighborsClassifier())
-cart = ('CART', DecisionTreeClassifier(criterion='entropy'))
-naive_bayes = ('NB', GaussianNB())
-svm = ('SVM', SVC())
-
-# Transformações que serão utilizadas
-standard_scaler = ('StandardScaler', StandardScaler())
-min_max_scaler = ('MinMaxScaler', MinMaxScaler())
+# # Listas para armazenar os armazenar os pipelines e os resultados para todas as visões do dataset
+# pipelines = []
+# results = []
+# names = []
 
 
-# Montando os pipelines
+# # Criando os elementos do pipeline
 
-# Dataset original
-#pipelines.append(('KNN', Pipeline([knn])))
-#pipelines.append(('CART', Pipeline([cart])))
-#pipelines.append(('NB', Pipeline([naive_bayes])))
-#pipelines.append(('SVM', Pipeline([svm])))
+# # Algoritmos que serão utilizados
+# knn = ('KNN', KNeighborsClassifier())
+# cart = ('CART', DecisionTreeClassifier(criterion='entropy'))
+# naive_bayes = ('NB', GaussianNB())
+# svm = ('SVM', SVC())
 
-# Dataset Padronizado
-#pipelines.append(('KNN-padr', Pipeline([standard_scaler, knn])))
-#pipelines.append(('CART-padr', Pipeline([standard_scaler, cart])))
-#pipelines.append(('NB-padr', Pipeline([standard_scaler, naive_bayes])))
-#pipelines.append(('SVM-padr', Pipeline([standard_scaler, svm])))
-
-# Dataset Normalizado
-#pipelines.append(('KNN-norm', Pipeline([min_max_scaler, knn])))
-#pipelines.append(('CART-norm', Pipeline([min_max_scaler, cart])))
-#pipelines.append(('NB-norm', Pipeline([min_max_scaler, naive_bayes])))
-#pipelines.append(('SVM-norm', Pipeline([min_max_scaler, svm])))
+# # Transformações que serão utilizadas
+# standard_scaler = ('StandardScaler', StandardScaler())
+# min_max_scaler = ('MinMaxScaler', MinMaxScaler())
 
 
-# Executando os pipelines
-for name, model in pipelines:
-    cv_results = cross_val_score(model, X, y, cv=kfold, scoring=SCORING)
-    results.append(cv_results)
-    names.append(name)
-    msg = f'{name}\t {arredonda(cv_results.mean())}\t {arredonda(cv_results.std())}'
-    #print(msg)
+# # Montando os pipelines
 
-print('\n')
+# # Dataset original
+# #pipelines.append(('KNN', Pipeline([knn])))
+# #pipelines.append(('CART', Pipeline([cart])))
+# #pipelines.append(('NB', Pipeline([naive_bayes])))
+# #pipelines.append(('SVM', Pipeline([svm])))
 
-# Boxplot de comparação dos modelos
-# fig = plt.figure(figsize=(25,6))
-# fig.suptitle('Comparação dos Modelos - Dataset orginal, padronizado e normalizado')
-# ax = fig.add_subplot(111)
-# plt.boxplot(results)
-# ax.set_xticklabels(names, rotation=90)
-# plt.show()
+# # Dataset Padronizado
+# #pipelines.append(('KNN-padr', Pipeline([standard_scaler, knn])))
+# #pipelines.append(('CART-padr', Pipeline([standard_scaler, cart])))
+# #pipelines.append(('NB-padr', Pipeline([standard_scaler, naive_bayes])))
+# #pipelines.append(('SVM-padr', Pipeline([standard_scaler, svm])))
 
-# Otimização dos hiperparâmetros
+# # Dataset Normalizado
+# #pipelines.append(('KNN-norm', Pipeline([min_max_scaler, knn])))
+# #pipelines.append(('CART-norm', Pipeline([min_max_scaler, cart])))
+# #pipelines.append(('NB-norm', Pipeline([min_max_scaler, naive_bayes])))
+# #pipelines.append(('SVM-norm', Pipeline([min_max_scaler, svm])))
 
-# Tuning do KNN
 
-pipelines = []
-
-# Definindo os componentes do pipeline
-cart = ('CART', DecisionTreeClassifier())
-standard_scaler = ('StandardScaler', StandardScaler())
-min_max_scaler = ('MinMaxScaler', MinMaxScaler())
-
-#pipelines.append(('cart-orig', Pipeline(steps=[cart])))
-#pipelines.append(('cart-padr', Pipeline(steps=[standard_scaler, cart])))
-#pipelines.append(('cart-norm', Pipeline(steps=[min_max_scaler, cart])))
-
-param_grid = { 'CART__criterion' : ['entropy'] }
-
-# Prepara e executa o GridSearchCV
+# # Executando os pipelines
 # for name, model in pipelines:
-#     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold)
-#     grid.fit(X_train, y_train)
-    #imprime a melhor configuração
-    #print(f'Sem tratamento de missings: {name} - '\
-        #f'Melhor: {grid.best_score_} usando: {grid.best_params_}')
+#     cv_results = cross_val_score(model, X, y, cv=kfold, scoring=SCORING)
+#     results.append(cv_results)
+#     names.append(name)
+#     msg = f'{name}\t {arredonda(cv_results.mean())}\t {arredonda(cv_results.std())}'
+#     #print(msg)
 
-print('\n')
-
-# Finalização do Modelo
-
-# CART ###########################################################################################
-
-# Preparação do modelo de treino
-#scaler = MinMaxScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
-
-# aplicação da normalização no conjunto de treino
-#rescaledX = scaler.transform(X_train)
-
-# aplicação da hiperparametrização no conjunto de treino
-# modelCart = DecisionTreeClassifier(criterion='entropy')
-
-# modelCart.fit(X_train, y_train)
-
-NOME_ARQUIVO_MODELO_ML = "modelos_ml/fumantes.pkl"
-#modelo = ModeloMl(NOME_ARQUIVO_MODELO_ML)
-#modelo.salvar_em_disco(modelCart)
-#modeloCart = ModeloMl().abrir_do_disco(NOME_ARQUIVO_MODELO_ML)
-
-
-#.salvar_em_disco(modelCart, NOME_ARQUIVO_MODELO_ML)
-
-
-# Estimativa da acurácia no conjunto de teste
-#rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
-# predictions = modelCart.predict(rescaledTestX)
-# print('Estimativas do dataset de teste usando CART')
-# print(f'Acurácia: {accuracy_score(y_test, predictions)}')
-# print(f'Precisão: {arredonda(precision_score(y_test, predictions))}')
-
-
-# Estimativa da acurácia no conjunto de TODO dataset
-# rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
-# predictions = modelCart.predict(rescaledX)
-# print('Estimativas do dataset completo usando CART:')
-# print(f'Acurácia: {accuracy_score(y, predictions)}')
-# print(f'Precisão: {arredonda(precision_score(y, predictions))}')
-
-
-# SVM ############################################################################################
-
-# Preparação do modelo de treino
-# scaler = StandardScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
-# rescaledX = scaler.transform(X_train) # aplicação da normalização no conjunto de treino
-# modelSVM = SVC()
-# modelSVM.fit(rescaledX, y_train)
-
-
-# Estimativa da acurácia no conjunto de teste
-# rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
-# predictions = modelSVM.predict(rescaledTestX)
-# print('Estimativas do dataset de teste usando SVM:')
-# print(f'Acurácia: {accuracy_score(y_test, predictions)}')
-# print(f'Precisão: {arredonda(precision_score(y_test, predictions))}')
-
-
-# Estimativa da acurácia no conjunto de TODO dataset
-# rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
-# predictions = modelSVM.predict(rescaledX)
-# print('Estimativas do dataset completo usando SVM:')
-# print(f'Acurácia: {accuracy_score(y, predictions)}')
-# print(f'Precisão: {arredonda(precision_score(y, predictions))}')
 # print('\n')
 
+# # Boxplot de comparação dos modelos
+# # fig = plt.figure(figsize=(25,6))
+# # fig.suptitle('Comparação dos Modelos - Dataset orginal, padronizado e normalizado')
+# # ax = fig.add_subplot(111)
+# # plt.boxplot(results)
+# # ax.set_xticklabels(names, rotation=90)
+# # plt.show()
 
-##################################################################################################
+# # Otimização dos hiperparâmetros
 
-# Simulando a aplicação do modelo em dados não vistos
+# # Tuning do KNN
 
-# CART
-#scaler = MinMaxScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
-#model = modelCart
+# pipelines = []
 
-#modelo = ModeloMl(NOME_ARQUIVO_MODELO_ML)
-modelo = ModeloMl.abrir_do_disco(NOME_ARQUIVO_MODELO)
-scaler = Normalizador.abrir_scaler_do_disco(NOME_ARQUIVO_SCALER)
+# # Definindo os componentes do pipeline
+# cart = ('CART', DecisionTreeClassifier())
+# standard_scaler = ('StandardScaler', StandardScaler())
+# min_max_scaler = ('MinMaxScaler', MinMaxScaler())
 
-X_input = np.array([27,160,60,81,.8,.6,1,1,119,
-70,130,192,115,42,127,12.7,1,.6,22,19,18,0,1])
-print(ModeloMl.predizer(modelo, scaler, X_input))
+# #pipelines.append(('cart-orig', Pipeline(steps=[cart])))
+# #pipelines.append(('cart-padr', Pipeline(steps=[standard_scaler, cart])))
+# #pipelines.append(('cart-norm', Pipeline(steps=[min_max_scaler, cart])))
 
-X_input = np.array([69,170,60,80,.8,.8,1,1,138,
-86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
-print(ModeloMl.predizer(modelo, scaler, X_input))
+# param_grid = { 'CART__criterion' : ['entropy'] }
 
-X_input = np.array([82,150,65,81.5,1.2,1.2,1,1,134,
-86,86,238,117,63,152,12,1,0.9,19,11,16,0,0])
-print(ModeloMl.predizer(modelo, scaler, X_input))
+# # Prepara e executa o GridSearchCV
+# # for name, model in pipelines:
+# #     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold)
+# #     grid.fit(X_train, y_train)
+#     #imprime a melhor configuração
+#     #print(f'Sem tratamento de missings: {name} - '\
+#         #f'Melhor: {grid.best_score_} usando: {grid.best_params_}')
 
-X_input = np.array([31,160,60,86,.7,.6,1,1,133,
-80,139,223,151,44,149,16.3,1,1.1,26,34,38,0,1])
-print(ModeloMl.predizer(modelo, scaler, X_input))
+# print('\n')
 
-X_input = np.array([71,165,65,84,1,1,1,1,120,
-76,95,235,132,52,166,13.7,4,.9,29,24,13,0,0])
-print(ModeloMl.predizer(modelo, scaler, X_input))
+# # Finalização do Modelo
 
-print('pausa')
+# # CART ###########################################################################################
 
-X_input = np.array([69,170,60,80,.8,.8,1,1,138,
-86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
-print(modelo.predizer(X_input))
+# # Preparação do modelo de treino
+# #scaler = MinMaxScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
 
-X_input = np.array([82,150,65,81.5,1.2,1.2,1,1,134,
-86,86,238,117,63,152,12,1,0.9,19,11,16,0,0])
-print(modelo.predizer(X_input))
+# # aplicação da normalização no conjunto de treino
+# #rescaledX = scaler.transform(X_train)
 
-X_input = np.array([31,160,60,86,.7,.6,1,1,133,
-80,139,223,151,44,149,16.3,1,1.1,26,34,38,0,1])
-print(modelo.predizer(X_input))
+# # aplicação da hiperparametrização no conjunto de treino
+# # modelCart = DecisionTreeClassifier(criterion='entropy')
 
-X_input = np.array([71,165,65,84,1,1,1,1,120,
-76,95,235,132,52,166,13.7,4,.9,29,24,13,0,0])
-print(modelo.predizer(X_input))
+# # modelCart.fit(X_train, y_train)
 
-##################################################################################################
+# NOME_ARQUIVO_MODELO_ML = "modelos_ml/fumantes.pkl"
+# #modelo = ModeloMl(NOME_ARQUIVO_MODELO_ML)
+# #modelo.salvar_em_disco(modelCart)
+# #modeloCart = ModeloMl().abrir_do_disco(NOME_ARQUIVO_MODELO_ML)
+
+
+# #.salvar_em_disco(modelCart, NOME_ARQUIVO_MODELO_ML)
+
+
+# # Estimativa da acurácia no conjunto de teste
+# #rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
+# # predictions = modelCart.predict(rescaledTestX)
+# # print('Estimativas do dataset de teste usando CART')
+# # print(f'Acurácia: {accuracy_score(y_test, predictions)}')
+# # print(f'Precisão: {arredonda(precision_score(y_test, predictions))}')
+
+
+# # Estimativa da acurácia no conjunto de TODO dataset
+# # rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
+# # predictions = modelCart.predict(rescaledX)
+# # print('Estimativas do dataset completo usando CART:')
+# # print(f'Acurácia: {accuracy_score(y, predictions)}')
+# # print(f'Precisão: {arredonda(precision_score(y, predictions))}')
+
+
+# # SVM ############################################################################################
+
+# # Preparação do modelo de treino
+# # scaler = StandardScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
+# # rescaledX = scaler.transform(X_train) # aplicação da normalização no conjunto de treino
+# # modelSVM = SVC()
+# # modelSVM.fit(rescaledX, y_train)
+
+
+# # Estimativa da acurácia no conjunto de teste
+# # rescaledTestX = scaler.transform(X_test) # aplicação da normalização no conjunto de teste
+# # predictions = modelSVM.predict(rescaledTestX)
+# # print('Estimativas do dataset de teste usando SVM:')
+# # print(f'Acurácia: {accuracy_score(y_test, predictions)}')
+# # print(f'Precisão: {arredonda(precision_score(y_test, predictions))}')
+
+
+# # Estimativa da acurácia no conjunto de TODO dataset
+# # rescaledX = scaler.transform(X) # aplicação da padronização no conjunto de todo dataset
+# # predictions = modelSVM.predict(rescaledX)
+# # print('Estimativas do dataset completo usando SVM:')
+# # print(f'Acurácia: {accuracy_score(y, predictions)}')
+# # print(f'Precisão: {arredonda(precision_score(y, predictions))}')
+# # print('\n')
+
+
+# ##################################################################################################
+
+# # Simulando a aplicação do modelo em dados não vistos
+
+# # CART
+# #scaler = MinMaxScaler().fit(X_train) # ajuste do scaler com o conjunto de treino
+# #model = modelCart
+
+# #modelo = ModeloMl(NOME_ARQUIVO_MODELO_ML)
+# modelo = ModeloMl.abrir_do_disco(NOME_ARQUIVO_MODELO)
+# scaler = Normalizador.abrir_scaler_do_disco(NOME_ARQUIVO_SCALER)
 
 # X_input = np.array([27,160,60,81,.8,.6,1,1,119,
 # 70,130,192,115,42,127,12.7,1,.6,22,19,18,0,1])
-# diagnosis = predizer(X_input, scaler, model)
-# print(f'#1\t {int(X_input[0])}\t Esperado:0\t Atingido:{diagnosis}')
+# print(ModeloMl.predizer(modelo, scaler, X_input))
 
 # X_input = np.array([69,170,60,80,.8,.8,1,1,138,
 # 86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
-# diagnosis = predizer(X_input, scaler, model)
-# print(f'#2\t {int(X_input[0])}\t Esperado:1\t Atingido:{diagnosis}')
+# print(ModeloMl.predizer(modelo, scaler, X_input))
 
 # X_input = np.array([82,150,65,81.5,1.2,1.2,1,1,134,
 # 86,86,238,117,63,152,12,1,0.9,19,11,16,0,0])
-# diagnosis = predizer(X_input, scaler, model)
-# print(f'#3\t {int(X_input[0])}\t Esperado:0\t Atingido:{diagnosis}')
+# print(ModeloMl.predizer(modelo, scaler, X_input))
 
 # X_input = np.array([31,160,60,86,.7,.6,1,1,133,
 # 80,139,223,151,44,149,16.3,1,1.1,26,34,38,0,1])
-# diagnosis = predizer(X_input, scaler, model)
-# print(f'#4\t {int(X_input[0])}\t Esperado:1\t Atingido:{diagnosis}')
+# print(ModeloMl.predizer(modelo, scaler, X_input))
 
 # X_input = np.array([71,165,65,84,1,1,1,1,120,
 # 76,95,235,132,52,166,13.7,4,.9,29,24,13,0,0])
-# diagnosis = predizer(X_input, scaler, model)
-# print(f'#5\t {int(X_input[0])}\t Esperado:0\t Atingido:{diagnosis}')
+# print(ModeloMl.predizer(modelo, scaler, X_input))
+
+# print('pausa')
+
+# X_input = np.array([69,170,60,80,.8,.8,1,1,138,
+# 86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
+# print(modelo.predizer(X_input))
+
+# X_input = np.array([82,150,65,81.5,1.2,1.2,1,1,134,
+# 86,86,238,117,63,152,12,1,0.9,19,11,16,0,0])
+# print(modelo.predizer(X_input))
+
+# X_input = np.array([31,160,60,86,.7,.6,1,1,133,
+# 80,139,223,151,44,149,16.3,1,1.1,26,34,38,0,1])
+# print(modelo.predizer(X_input))
+
+# X_input = np.array([71,165,65,84,1,1,1,1,120,
+# 76,95,235,132,52,166,13.7,4,.9,29,24,13,0,0])
+# print(modelo.predizer(X_input))
+
+# ##################################################################################################
+
+# # X_input = np.array([27,160,60,81,.8,.6,1,1,119,
+# # 70,130,192,115,42,127,12.7,1,.6,22,19,18,0,1])
+# # diagnosis = predizer(X_input, scaler, model)
+# # print(f'#1\t {int(X_input[0])}\t Esperado:0\t Atingido:{diagnosis}')
+
+# # X_input = np.array([69,170,60,80,.8,.8,1,1,138,
+# # 86,89,242,182,55,151,15.8,1,1,21,16,22,0,0])
+# # diagnosis = predizer(X_input, scaler, model)
+# # print(f'#2\t {int(X_input[0])}\t Esperado:1\t Atingido:{diagnosis}')
+
+# # X_input = np.array([82,150,65,81.5,1.2,1.2,1,1,134,
+# # 86,86,238,117,63,152,12,1,0.9,19,11,16,0,0])
+# # diagnosis = predizer(X_input, scaler, model)
+# # print(f'#3\t {int(X_input[0])}\t Esperado:0\t Atingido:{diagnosis}')
+
+# # X_input = np.array([31,160,60,86,.7,.6,1,1,133,
+# # 80,139,223,151,44,149,16.3,1,1.1,26,34,38,0,1])
+# # diagnosis = predizer(X_input, scaler, model)
+# # print(f'#4\t {int(X_input[0])}\t Esperado:1\t Atingido:{diagnosis}')
+
+# # X_input = np.array([71,165,65,84,1,1,1,1,120,
+# # 76,95,235,132,52,166,13.7,4,.9,29,24,13,0,0])
+# # diagnosis = predizer(X_input, scaler, model)
+# # print(f'#5\t {int(X_input[0])}\t Esperado:0\t Atingido:{diagnosis}')
