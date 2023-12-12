@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Moove-se - Aluguéis</title>
+        <title>Instituto Moove-se de Saúde - Predição de Pacientes Fumantes</title>
         <meta charset="utf-8" /> 
         <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
         <link rel="stylesheet" type="text/css" href="css/elementos.css">
@@ -15,25 +15,10 @@
     </head>
     <body>
 
-        <div class="popup-operacao-sucesso">
-            <div style="margin: 0 auto; width: 250px">Operação realizada com sucesso!</div>
-        </div>
-
         <div style="display:flex; height:100%">
-            <div style="background-color: #ff4500; color: white">
-                <div style="font-family: 'Caprasimo', cursive; font-size: 30pt; padding: 50px 50px; text-align: center; width: 180px;">
-                    Moove-se
-                </div>
-                <div class="menu">
-                    <div class="menu-item-selecionado">
-                        <a href="index.html">Aluguéis</a>
-                    </div>
-                    <div>
-                        <a href="clientes.html">Clientes</a>
-                    </div>
-                    <div>
-                        <a href="anuncios.html">Anúncios</a>
-                    </div>
+            <div style="background-color: #4361ee; color: white">
+                <div style="font-family: 'Caprasimo', cursive; font-size: 20pt; padding: 50px 50px; text-align: center; width: 180px;">
+                    Instituto Moove-se de Saúde
                 </div>
             </div>
             <div style="padding: 50px;">
@@ -134,142 +119,13 @@
                             </div>
                         </form>
 
-                        <!-- <div id="divListaAlugueis" class="tabelao">
-                            <div class="row cabecalho">
-                                <div>Veículo</div>
-                                <div>Data Início</div>
-                                <div>Data Término</div>
-                                <div>Valor</div>
-                                <div style="width: 60px"></div>
-                                <div style="width: 60px"></div>
-                            </div>
-                            <div id="divNaoHaAlugueis" style="display: none; padding: 50px; text-align: center;">
-                                Não há aluguéis cadastrados. Convoque o marketing, aguarde sentado ou clique no botão "Criar Novo"
-                            </div>
-                            <div id="divListaAlugueis_linhas" class="linhas"></div>
-                            <div id="divItemTemplate" style="display:none">
-                                <div class="row item">
-                                    <div>[veiculo]</div>
-                                    <div>[data_inicio]</div>
-                                    <div>[data_termino]</div>
-                                    <div>[valor]</div>
-                                    <div class="icone" onclick="get_aluguel([id])">
-                                        <img src="img/edit_FILL0_wght100_GRAD200_opsz24.svg" />
-                                    </div>
-                                    <div class="icone" onclick="ativar_confirmacao_delecao([id])">
-                                        <img src="img/delete_FILL0_wght100_GRAD200_opsz24.svg" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
                     </div>
                 </section>
             </div>
         </div>
 
-        <!-- Modal Aluguel -->
-        <div id="divModalAluguel" class="modal">
-            <div class="modal-content" style="border-radius: 10px; width: 400px">
-                <div class="flex flex-center flex-space-between" style="padding-bottom: 40px">
-                    <div>
-                        <p id="titulo" class="modal-titulo">Novo Aluguel</p>
-                    </div>
-                    <div>
-                        <span class="close">&times;</span>
-                    </div>
-                </div>
-                <form action="" method="post">
-                    <input type="hidden" id="hiddenId" />
-                    <input type="hidden" id="hidIdCliente" />
-                    <div>
-                        <div style="margin: 0 auto; width: fit-content">
-                            <div style="margin-bottom: 15px">
-                                <div>
-                                    <input type="text" id="txtCpfCliente" maxlength="11" placeholder="CPF" />
-                                </div>
-                                <div style="margin: 20px 0">
-                                    <label id="lblNomeCliente">&nbsp;</label>
-                                </div>
-                            </div>
-                            <div style="margin-bottom: 15px">
-                                <div class="rotulo-input">Veículo:</div>
-                                <div>
-                                    <select id="selModeloVeiculo" required title="Escolha um veículo" style="width: 100%">
-                                        <option value="">-- Escolha o modelo --</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="flex flex-space-between" style="margin-bottom: 15px; width: 360px">
-                                <div>
-                                    <div class="rotulo-input">Início:</div>
-                                    <input type="date" id="dateDataInicio" placeholder="Data de Início" style="width: 170px" />
-                                </div>
-                                <div>
-                                    <div class="rotulo-input">Término:</div>
-                                    <input type="date" id="dateDataTermino" style="width: 170px" />
-                                </div>
-                            </div>
-                            <div style="background-color: #f8f8ff; border: solid 1px #e5e9fd; border-radius: 10px; margin-top: 30px; padding: 10px 30px">
-                                <div class="flex flex-space-between" style="line-height: 30pt">
-                                    <div>Diária:</div>
-                                    <div id="divValorDiariaVeiculo"></div>
-                                </div>
-                                <div class="flex flex-space-between" style="line-height: 30pt">
-                                    <div>Dias:</div>
-                                    <div id="divDias"></div>
-                                </div>
-                                <div class="flex flex-space-between" style="line-height: 30pt">
-                                    <div>Total do aluguel:</div>
-                                    <div id="divTotal"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex-end modal-rodape-botoes">
-                        <div>
-                            <button type="button" id="btnSalvarAluguel" class="btnPrimario">Salvar</button>
-                            <button type="button" id="btnSalvarAlteracoesAluguel" class="btnPrimario">Salvar Alterações</button>
-                        </div>
-                        <div><button type="button" class="btnSecundario" onclick="closeModal(divModalAluguel)">Cancelar</button></div>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Modal Deleta Aluguel -->
-        <div id="divModalDeleteAluguel" class="modal">
-            <div class="modal-content" style="border-radius: 10px; width: 400px;">
-                <div class="flex flex-center flex-space-between" style="padding-bottom: 40px">
-                    <div>
-                        <p id="titulo" class="modal-titulo">Excluir Aluguel</p>
-                    </div>
-                    <div>
-                        <span class="close">&times;</span>
-                    </div>
-                </div>
-                <div style="padding: 20px 0; text-align: center;">
-                    Deseja realmente excluir este aluguel?
-                </div>
-                <div class="flex-end modal-rodape-botoes">
-                    <div>
-                        <input id="hiddenIdAluguelModalDeleteAluguel" type="hidden">
-                        <button type="button" id="btnDeletarAluguel" class="btnPrimario" onclick="delete_aluguel(hiddenIdAluguelModalDeleteAluguel.value)">Confirmar</button>
-                    </div>
-                    <div><button type="button" class="btnSecundario" onclick="closeModal(divModalDeleteAluguel)">Cancelar</button></div>
-                </div>
-            </div>
-        </div>
-
         <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.7.0.min.js"></script>
-        <script src="js/alugueis.js"></script>
         <script src="js/predicao.js"></script>
-        <script src="js/uteis.js"></script>
         <script src="js/elementos.js"></script>
-        <script src="js/modal.js"></script>
-        <!-- scripts Startup  -->
-        <script>
-            get_modelos_veiculos();
-            get_alugueis();
-        </script>
     </body>
 </html>
