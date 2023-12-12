@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from flask import redirect
+from flask_cors import CORS
 from flask_openapi3 import OpenAPI, Info, Tag
 from sklearn.metrics import precision_score
 from sklearn.metrics import accuracy_score, precision_score
@@ -33,6 +34,7 @@ from schemas import *
 info = Info(title="API do Sistema de Fumantes", version="1.0.0")
 app = OpenAPI(__name__, info=info)
 
+CORS(app)
 
 home_tag = Tag(name="Documentação", description="Seleção de documentação: Swagger," \
     "Redoc ou RapiDoc.")

@@ -39,13 +39,102 @@
             <div style="padding: 50px;">
                 <section>
                     <div class="flex flex-space-between" style="height: 80px;">
-                        <div><span style="font-size: 20pt; font-weight: bold;">Aluguéis</span></div>
-                        <div id="btnNovoAluguel"><button class="btnPrimario">Criar Novo</button></div>
+                        <div><span style="font-size: 20pt; font-weight: bold;">Predição de Paciente Fumante</span></div>
                     </div>
                 </section>
                 <section>
+                    <div style="padding-bottom: 20px;">Dados deixados propositalmente no formulário para testes dos professores</div>
                     <div style="position: relative">
-                        <div id="divListaAlugueis" class="tabelao">
+                        <form action="" method="post">
+                            <table>
+                                <tr>
+                                    <td><label>Idade:</label></td>
+                                    <td><input type="text" id="txtIdade" placeholder="Idade" value="69" /></td>
+                                    <td><label>Altura (cm):</label></td>
+                                    <td><input type="text" id="txtAltura" placeholder="Altura (cm)" value="170" />
+                                    <td><label>Peso (Kg):</label></td>
+                                    <td><input type="text" id="txtPeso" placeholder="Peso (Kg)" value="60" />
+                                </tr>
+                                <tr>
+                                    <td><label>Cintura (cm):</label></td>
+                                    <td><input type="text" id="txtCintura" placeholder="Cintura (cm)" value="80" /></td>
+                                    <td><label>Visão esquerda:</label></td>
+                                    <td><input type="text" id="txtVisao_esquerda" placeholder="Visão esquerda" value="0.8" /></td>
+                                    <td><label>Visão direita:</label></td>
+                                    <td><input type="text" id="txtVisao_direita" placeholder="Visão direita" value="0.8" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Audição esquerda:</label></td>
+                                    <td><input type="text" id="txtAudicao_esquerda" placeholder="Audição esquerda" value="1" /></td>
+                                    <td><label>Audição direita:</label></td>
+                                    <td><input type="text" id="txtAudicao_direita" placeholder="Audição direita"  value="1"/></td>
+                                    <td><label>Sistólica:</label></td>
+                                    <td><input type="text" id="txtSistolica" placeholder="Sistólica" value="138" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Audição esquerda:</label></td>
+                                    <td><input type="text" id="txtAudicao_esquerda" placeholder="Audição esquerda" value="86" /></td>
+                                    <td><label>Audição direita:</label></td>
+                                    <td><input type="text" id="txtAudicao_direita" placeholder="Audição direita" value="89" /></td>
+                                    <td><label>Sistólica:</label></td>
+                                    <td><input type="text" id="txtSistolica" placeholder="Sistólica" value="242" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Relaxado:</label></td>
+                                    <td><input type="text" id="txtRelaxado" placeholder="Relaxado" value="182" /></td>
+                                    <td><label>Açúcar no sangue em jejum:</label></td>
+                                    <td><input type="text" id="txtAcucar_no_sangue_em_jejum" placeholder="Açúcar no sangue em jejum" value="55" /></td>
+                                    <td><label>Colesterol:</label></td>
+                                    <td><input type="text" id="txtColesterol" placeholder="Colesterol" value="151" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Triglicerídeos:</label></td>
+                                    <td><input type="text" id="txtTrigliceridos" placeholder="Triglicerídeos" value="182" /></td>
+                                    <td><label>HDL:</label></td>
+                                    <td><input type="text" id="txtHDL" placeholder="HDL" value="55" /></td>
+                                    <td><label>LDL:</label></td>
+                                    <td><input type="text" id="txtLDL" placeholder="LDL" value="151" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Hemoglobina:</label></td>
+                                    <td><input type="text" id="txtHemoglobina" placeholder="Hemoglobina"  value="15.8"/></td>
+                                    <td><label>Proteína na urina:</label></td>
+                                    <td><input type="text" id="txtProteina_na_urina" placeholder="Proteína na urina" value="1" /></td>
+                                    <td><label>Creatinina sérica:</label></td>
+                                    <td><input type="text" id="txtCreatinina_serica" placeholder="Creatinina sérica" value="1" /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>AST:</label></td>
+                                    <td><input type="text" id="txtAST" placeholder="AST" value="24" /></td>
+                                    <td><label>ALT:</label></td>
+                                    <td><input type="text" id="txtALT" placeholder="ALT" value="16" /></td>
+                                    <td><label>Gtp:</label></td>
+                                    <td><input type="text" id="txtGtp" placeholder="Gtp" value="22" /></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label for="cbxCaries_dentarias">Cáries dentárias:</label>
+                                        <input type="checkbox" id="cbxCaries_dentarias" />
+                                    </td>
+                                    <td>
+                                    </td>
+                                    <td>
+                                        <label for="cbxTartaro">Tártaro:</label>
+                                        <input type="checkbox" id="cbxTartaro" />
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                            <div class="flex-end modal-rodape-botoes">
+                                <div>
+                                    <button type="button" id="btnPredicaoPaciente" class="btnPrimario">Realizar Predição</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- <div id="divListaAlugueis" class="tabelao">
                             <div class="row cabecalho">
                                 <div>Veículo</div>
                                 <div>Data Início</div>
@@ -72,7 +161,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </section>
             </div>
@@ -173,6 +262,7 @@
 
         <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.7.0.min.js"></script>
         <script src="js/alugueis.js"></script>
+        <script src="js/predicao.js"></script>
         <script src="js/uteis.js"></script>
         <script src="js/elementos.js"></script>
         <script src="js/modal.js"></script>
